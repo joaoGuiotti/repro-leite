@@ -1,14 +1,15 @@
 import { AppIcons, hapticFeedback, Icon, Screen } from '@/ui';
 import { DEFAULT_FARM_ID } from '@core/db';
 import { BullsScreen } from '@features/bulls';
-import { AnimalRecord, HerdScreen } from '@features/herd';
+import { AnimalRecord, HerdScreen, getHerdUseCases } from '@features/herd';
 import { InseminationScreen } from '@features/insemination';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 export interface ReproductionScreenProps {
   farmId?: string;
   initialTab?: 'rebanho' | 'inseminar' | 'touros';
+  preselectedAnimalId?: string | null;
 }
 
 /**
@@ -17,11 +18,24 @@ export interface ReproductionScreenProps {
 export function ReproductionScreen({
   farmId = DEFAULT_FARM_ID,
   initialTab = 'rebanho',
+  preselectedAnimalId,
 }: ReproductionScreenProps) {
   const [secaoAtiva, setSecaoAtiva] = useState<'rebanho' | 'inseminar' | 'touros'>(initialTab);
   const [totalRebanho, setTotalRebanho] = useState<number>(0);
   const [totalTouros, setTotalTouros] = useState<number>(0);
   const [vacaPreSelecionada, setVacaPreSelecionada] = useState<AnimalRecord | null>(null);
+
+  useEffect(() => {
+    if (preselectedAnimalId) {
+      const { repo } = getHerdUseCases();
+      repo.findById(preselectedAnimalId).then((animal) => {
+        if (animal) {
+          setVacaPreSelecionada(animal);
+          setSecaoAtiva('inseminar');
+        }
+      });
+    }
+  }, [preselectedAnimalId]);
 
   const menuOptions = [
     {
@@ -56,7 +70,7 @@ export function ReproductionScreen({
   };
 
   return (
-    <Screen edges={['top', 'left', 'right']} className="flex-1">
+    <Screen className="flex-1 pt-3">
       {/* Seletor Segmentado Superior com Acessibilidade e Alvos de Toque Adequados */}
       <View className="px-4 pt-1 pb-2 bg-surface dark:bg-surface-dark border-b border-gray-200 dark:border-slate-800">
         <View className="flex-row rounded-2xl bg-gray-100 dark:bg-slate-800 p-1.5">

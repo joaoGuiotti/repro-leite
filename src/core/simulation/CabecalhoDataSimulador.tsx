@@ -7,7 +7,7 @@ export function CabecalhoDataSimulador() {
   const { activeDateString, isSimulated, advanceDays, resetToToday } = useManagementDate();
 
   return (
-    <View className="flex-row flex-wrap items-center justify-between gap-2 border-b border-pasto-200 dark:border-slate-800 bg-pasto-700 dark:bg-slate-900 px-4 py-2">
+    <View className="flex-row flex-wrap items-center justify-between gap-2 border-b border-pasto-200 dark:border-slate-800 bg-pasto-700 dark:bg-slate-900 px-4 py-3">
       {/* Indicador da Data Ativa */}
       <View className="flex-row items-center gap-2">
         <Calendar size={16} color="#fff" />
