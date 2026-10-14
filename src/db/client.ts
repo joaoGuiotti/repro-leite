@@ -98,6 +98,50 @@ export async function initDatabase(): Promise<void> {
       last_success_at TEXT,
       updated_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS animals (
+      id TEXT PRIMARY KEY NOT NULL,
+      farm_id TEXT NOT NULL REFERENCES farms(id),
+      ear_tag TEXT NOT NULL,
+      ear_tag_normalized TEXT NOT NULL,
+      name TEXT,
+      breed TEXT NOT NULL,
+      sex TEXT NOT NULL DEFAULT 'femea',
+      birth_date TEXT NOT NULL,
+      birth_weight_kg REAL NOT NULL DEFAULT 40.0,
+      life_stage TEXT NOT NULL DEFAULT 'adulta',
+      repro_status TEXT NOT NULL DEFAULT 'vazia',
+      exit_status TEXT NOT NULL DEFAULT 'ativo',
+      exit_date TEXT,
+      exit_reason TEXT,
+      notes TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_animals_farm_ear_tag_active 
+    ON animals (farm_id, ear_tag_normalized) 
+    WHERE deleted_at IS NULL AND exit_status = 'ativo';
+
+    CREATE INDEX IF NOT EXISTS idx_animals_farm_status 
+    ON animals (farm_id, exit_status, repro_status, deleted_at);
+
+    CREATE TABLE IF NOT EXISTS bulls (
+      id TEXT PRIMARY KEY NOT NULL,
+      farm_id TEXT NOT NULL REFERENCES farms(id),
+      name TEXT NOT NULL,
+      breed TEXT NOT NULL,
+      code TEXT,
+      straws_in_stock INTEGER NOT NULL DEFAULT 0,
+      notes TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_bulls_farm 
+    ON bulls (farm_id, deleted_at);
   `);
 
   await ensureDefaultFarm();

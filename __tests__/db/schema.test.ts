@@ -43,4 +43,32 @@ describe('Schema & Banco Local Core', () => {
     expect(schema.syncQueue.recordId).toBeDefined();
     expect(schema.syncQueue.operation).toBeDefined();
   });
+
+  test('Schema animals deve conter colunas e índices zootécnicos esperados', () => {
+    expect(schema.animals).toBeDefined();
+    expect(schema.animals.id).toBeDefined();
+    expect(schema.animals.farmId).toBeDefined();
+    expect(schema.animals.earTag).toBeDefined();
+    expect(schema.animals.earTagNormalized).toBeDefined();
+    expect(schema.animals.name).toBeDefined();
+    expect(schema.animals.breed).toBeDefined();
+    expect(schema.animals.sex).toBeDefined();
+    expect(schema.animals.birthDate).toBeDefined();
+    expect(schema.animals.birthWeightKg).toBeDefined();
+    expect(schema.animals.lifeStage).toBeDefined();
+    expect(schema.animals.reproStatus).toBeDefined();
+    expect(schema.animals.exitStatus).toBeDefined();
+    expect(schema.animals.exitDate).toBeDefined();
+    expect(schema.animals.exitReason).toBeDefined();
+  });
+
+  test('Schema bulls deve conter colunas para catálogo e estoque de sêmen', () => {
+    expect(schema.bulls).toBeDefined();
+    expect(schema.bulls.id).toBeDefined();
+    expect(schema.bulls.farmId).toBeDefined();
+    expect(schema.bulls.name).toBeDefined();
+    expect(schema.bulls.breed).toBeDefined();
+    expect(schema.bulls.code).toBeDefined();
+    expect(schema.bulls.strawsInStock).toBeDefined();
+  });
 });

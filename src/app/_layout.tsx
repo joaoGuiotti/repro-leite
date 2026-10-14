@@ -25,17 +25,6 @@ export default function RootLayout() {
     setup();
   }, []);
 
-  if (!isDbReady) {
-    return (
-      <View className="flex-1 items-center justify-center bg-pasto-50 p-6">
-        <ActivityIndicator size="large" color="#1b4332" />
-        <Text className="mt-4 text-base font-semibold text-pasto-900">
-          Carregando ReproLeite...
-        </Text>
-      </View>
-    );
-  }
-
   return (
     <SafeAreaProvider>
       <ManagementDateProvider>
@@ -44,6 +33,14 @@ export default function RootLayout() {
             <StatusBar style="dark" />
             <CabecalhoStatusSimulador />
             <Stack screenOptions={{ headerShown: false }} />
+            {!isDbReady && (
+              <View className="absolute inset-0 z-50 items-center justify-center bg-pasto-50 p-6">
+                <ActivityIndicator size="large" color="#1b4332" />
+                <Text className="mt-4 text-base font-semibold text-pasto-900">
+                  Carregando ReproLeite...
+                </Text>
+              </View>
+            )}
           </SafeAreaView>
         </SyncStatusProvider>
       </ManagementDateProvider>
