@@ -1,5 +1,5 @@
-import { generateUUID, DEFAULT_FARM_ID, DEFAULT_FARM_NAME } from '../../src/db/client';
-import * as schema from '../../src/db/schema';
+import { generateUUID, DEFAULT_FARM_ID, DEFAULT_FARM_NAME } from '@core/db';
+import * as schema from '@core/db/schema';
 
 describe('Schema & Banco Local Core', () => {
   test('generateUUID deve gerar UUIDs v4 válidos e distintos', () => {

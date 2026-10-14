@@ -7,7 +7,7 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { ManagementDateProvider } from '@core/simulation';
 import { SyncStatusProvider } from '@core/sync';
 import { CabecalhoStatusSimulador } from '../ui/CabecalhoStatusSimulador';
-import { initDatabase } from '../db/client';
+import { initDatabase } from '@core/db';
 
 export default function RootLayout() {
   const [isDbReady, setIsDbReady] = useState(false);

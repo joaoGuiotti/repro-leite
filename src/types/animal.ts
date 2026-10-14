@@ -1,4 +1,4 @@
-import { BaseEntity } from '@/db/schema/common';
+import { BaseEntity } from '@core/db/schema/common';
 
 export type AnimalSex = 'femea' | 'macho';
 

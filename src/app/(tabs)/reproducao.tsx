@@ -3,7 +3,7 @@ import { ModalSaidaAnimal } from '@/components/rebanho/ModalSaidaAnimal';
 import { CatalogoTouros } from '@/components/touros/CatalogoTouros';
 import { FormularioInseminacaoRapida } from '@/components/inseminacao/FormularioInseminacaoRapida';
 import { HistoricoInseminacoesRecentes } from '@/components/inseminacao/HistoricoInseminacoesRecentes';
-import { DEFAULT_FARM_ID } from '@/db/client';
+import { DEFAULT_FARM_ID } from '@core/db';
 import { AnimalRepository } from '@/db/repositories/animalRepository';
 import { BullRepository } from '@/db/repositories/bullRepository';
 import { filterAnimals } from '@/domain/animalFilters';
