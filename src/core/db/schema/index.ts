@@ -6,3 +6,4 @@ export * from './inseminations';
 export * from './alerts';
 export * from './settings';
 export * from './sync';
+export * from './weighings';

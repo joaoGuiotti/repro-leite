@@ -199,6 +199,18 @@ export async function initDatabase(): Promise<void> {
       updated_at TEXT NOT NULL,
       deleted_at TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS weighings (
+      id TEXT PRIMARY KEY NOT NULL,
+      farm_id TEXT NOT NULL REFERENCES farms(id),
+      animal_id TEXT NOT NULL REFERENCES animals(id),
+      date TEXT NOT NULL,
+      weight_kg REAL NOT NULL,
+      notes TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT
+    );
   `);
 
   // 2. Migrações incrementais para tabelas pré-existentes (executadas ANTES da criação de índices)
@@ -259,6 +271,12 @@ export async function initDatabase(): Promise<void> {
 
     CREATE INDEX IF NOT EXISTS idx_alerts_source 
     ON alerts (source_id, deleted_at);
+
+    CREATE INDEX IF NOT EXISTS idx_weighings_animal_date
+    ON weighings (animal_id, date);
+
+    CREATE INDEX IF NOT EXISTS idx_weighings_farm_deleted
+    ON weighings (farm_id, deleted_at);
   `);
 
   // 4. Garante a existência da fazenda padrão para uso offline imediato
