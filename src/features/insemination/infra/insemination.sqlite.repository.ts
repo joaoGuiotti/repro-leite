@@ -1,6 +1,6 @@
 import { and, desc, eq, isNull } from 'drizzle-orm';
 import { getDatabase } from '@core/db/client';
-import { animals } from '@features/herd';
+import { animals } from '@features/herd/infra/animal.schema';
 import { InseminationRepository } from '../domain/insemination.repository';
 import {
   InseminationRecord,

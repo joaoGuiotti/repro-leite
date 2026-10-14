@@ -1,8 +1,5 @@
-import { and, eq, isNull, lte } from 'drizzle-orm';
-import { generateUUID, getDatabase } from '../client';
-import * as schema from '../schema';
-import { AlertRecord, CreateAlertDTO } from '@/types/alert';
-import { SyncQueueRepository } from '@core/sync';
+import { AlertRecord, CreateAlertDTO, getAlertsUseCases } from '@features/alerts';
+import { DEFAULT_FARM_ID } from '@core/db';
 
 export class AlertRepository {
   /**
@@ -12,121 +9,41 @@ export class AlertRepository {
     farmId: string,
     upToDate?: string
   ): Promise<AlertRecord[]> {
-    const db = getDatabase();
-
-    const conditions = [
-      eq(schema.alerts.farmId, farmId),
-      isNull(schema.alerts.completedAt),
-      isNull(schema.alerts.deletedAt),
-    ];
-
-    if (upToDate) {
-      conditions.push(lte(schema.alerts.dueDate, upToDate));
+    const res = await getAlertsUseCases().listPendingUseCase.execute(farmId, upToDate);
+    if (!res.ok) {
+      throw new Error(res.error.message);
     }
-
-    const records = await db
-      .select()
-      .from(schema.alerts)
-      .where(and(...conditions));
-
-    return records as AlertRecord[];
+    return res.value;
   }
 
   /**
    * Cria um novo alerta e registra na sync_queue.
    */
   static async create(data: CreateAlertDTO): Promise<AlertRecord> {
-    const db = getDatabase();
-    const id = generateUUID();
-    const now = new Date().toISOString();
-
-    const newAlert = {
-      id,
-      farmId: data.farmId,
-      targetAnimalId: data.targetAnimalId,
-      type: data.type,
-      dueDate: data.dueDate,
-      completedAt: null,
-      sourceId: data.sourceId ?? null,
-      notes: data.notes ?? null,
-      createdAt: now,
-      updatedAt: now,
-      deletedAt: null,
-    };
-
-    await db.insert(schema.alerts).values(newAlert);
-
-    await SyncQueueRepository.enqueue(
-      data.farmId,
-      'alerts',
-      id,
-      'INSERT',
-      newAlert
-    );
-
-    return newAlert as AlertRecord;
+    const res = await getAlertsUseCases().createUseCase.execute(data);
+    if (!res.ok) {
+      throw new Error(res.error.message);
+    }
+    return res.value;
   }
 
   /**
    * Marca um alerta como concluído.
    */
   static async completeAlert(id: string): Promise<void> {
-    const db = getDatabase();
-    const now = new Date().toISOString();
-
-    const existing = await db
-      .select()
-      .from(schema.alerts)
-      .where(eq(schema.alerts.id, id))
-      .limit(1);
-
-    if (existing.length === 0) return;
-
-    await db
-      .update(schema.alerts)
-      .set({
-        completedAt: now,
-        updatedAt: now,
-      })
-      .where(eq(schema.alerts.id, id));
-
-    await SyncQueueRepository.enqueue(
-      existing[0].farmId,
-      'alerts',
-      id,
-      'UPDATE',
-      { completedAt: now, updatedAt: now }
-    );
+    const res = await getAlertsUseCases().completeUseCase.execute(id);
+    if (!res.ok) {
+      throw new Error(res.error.message);
+    }
   }
 
   /**
    * Exclui logicamente todos os alertas associados a uma fonte (ex.: ID de inseminação cancelada).
    */
   static async softDeleteBySourceId(sourceId: string): Promise<void> {
-    const db = getDatabase();
-    const now = new Date().toISOString();
-
-    const alertsToCancel = await db
-      .select()
-      .from(schema.alerts)
-      .where(and(eq(schema.alerts.sourceId, sourceId), isNull(schema.alerts.deletedAt)));
-
-    for (const alert of alertsToCancel) {
-      await db
-        .update(schema.alerts)
-        .set({
-          deletedAt: now,
-          updatedAt: now,
-        })
-        .where(eq(schema.alerts.id, alert.id));
-
-      await SyncQueueRepository.enqueue(
-        alert.farmId,
-        'alerts',
-        alert.id,
-        'UPDATE',
-        { deletedAt: now, updatedAt: now }
-      );
+    const res = await getAlertsUseCases().dismissUseCase.execute(DEFAULT_FARM_ID, sourceId);
+    if (!res.ok) {
+      throw new Error(res.error.message);
     }
   }
 }

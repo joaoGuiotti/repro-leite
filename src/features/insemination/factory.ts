@@ -2,7 +2,7 @@ import { DrizzleTransactionRunner } from '@core/db/transaction';
 import { OutboxRepository } from '@core/sync/outbox.repository';
 import { AnimalSqliteRepository } from '@features/herd';
 import { BullSqliteRepository } from '@features/bulls';
-import { AlertRepository } from '@/db/repositories/alertRepository';
+import { getAlertsUseCases } from '@features/alerts';
 import { InseminationSqliteRepository } from './infra/insemination.sqlite.repository';
 import { RegisterInseminationUseCase } from './application/register-insemination.usecase';
 import { ListRecentInseminationsUseCase } from './application/list-recent-inseminations.usecase';
@@ -26,9 +26,16 @@ export function getInseminationUseCases(): InseminationUseCases {
     const outbox = {
       enqueue: OutboxRepository.enqueue,
     };
+    const alerts = getAlertsUseCases();
     const alertService = {
-      create: AlertRepository.create,
-      softDeleteBySourceId: AlertRepository.softDeleteBySourceId,
+      create: async (data: any) => {
+        const res = await alerts.createUseCase.execute(data);
+        if (!res.ok) throw new Error(res.error.message);
+      },
+      softDeleteBySourceId: async (sourceId: string) => {
+        const res = await alerts.dismissUseCase.execute('00000000-0000-4000-a000-000000000001', sourceId);
+        if (!res.ok) throw new Error(res.error.message);
+      },
     };
 
     cachedUseCases = {

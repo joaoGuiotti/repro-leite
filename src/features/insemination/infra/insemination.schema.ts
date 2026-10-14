@@ -1,7 +1,7 @@
 import { index, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { farms } from '@core/db/schema/farms';
-import { animals } from '@features/herd';
-import { bulls } from '@features/bulls';
+import { animals } from '@features/herd/infra/animal.schema';
+import { bulls } from '@features/bulls/infra/bull.schema';
 
 /**
  * Tabela de inseminações artificiais realizadas no rebanho.
