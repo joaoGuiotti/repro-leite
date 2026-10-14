@@ -1,4 +1,4 @@
-import { checkConsanguinity } from '../../src/domain/consanguinity';
+import { checkConsanguinity } from '../consanguinity';
 
 describe('Domain: consanguinity (Detecção Determinística de Parentesco)', () => {
   test('deve detectar consanguinidade de 1º grau quando o touro for pai pelo ID', () => {

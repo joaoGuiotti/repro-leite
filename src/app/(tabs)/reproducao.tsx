@@ -1,15 +1,11 @@
-import { CatalogoTouros } from '@/components/touros/CatalogoTouros';
 import { FormularioInseminacaoRapida } from '@/components/inseminacao/FormularioInseminacaoRapida';
 import { HistoricoInseminacoesRecentes } from '@/components/inseminacao/HistoricoInseminacoesRecentes';
 import { DEFAULT_FARM_ID } from '@core/db';
-import { BullRepository } from '@/db/repositories/bullRepository';
 import { AnimalRecord, HerdScreen } from '@features/herd';
-import { BullRecord, CreateBullDTO } from '@/types/bull';
+import { BullsScreen } from '@features/bulls';
 import { Shield, Sparkles, Users } from 'lucide-react-native';
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -18,67 +14,14 @@ import {
 
 export default function TelaReproducao() {
   const [secaoAtiva, setSecaoAtiva] = useState<'rebanho' | 'inseminar' | 'touros'>('rebanho');
-  const [carregandoTouros, setCarregandoTouros] = useState(true);
 
-  // Touros
-  const [touros, setTouros] = useState<BullRecord[]>([]);
-
-  // Contador de animais no rebanho
+  // Contadores para o cabeçalho segmentado
   const [totalRebanho, setTotalRebanho] = useState<number>(0);
+  const [totalTouros, setTotalTouros] = useState<number>(0);
 
   // Inseminação
   const [vacaPreSelecionada, setVacaPreSelecionada] = useState<AnimalRecord | null>(null);
   const [refreshHistorico, setRefreshHistorico] = useState(0);
-
-  const carregarTouros = useCallback(async () => {
-    try {
-      const listaTouros = await BullRepository.listByFarm(DEFAULT_FARM_ID);
-      setTouros(listaTouros);
-    } catch (err) {
-      console.error('Erro ao recarregar dados de touros:', err);
-    }
-  }, []);
-
-  useEffect(() => {
-    let ativo = true;
-
-    async function buscarInicial() {
-      try {
-        const listaTouros = await BullRepository.listByFarm(DEFAULT_FARM_ID);
-        if (ativo) {
-          setTouros(listaTouros);
-        }
-      } catch (err) {
-        console.error('Erro ao carregar catálogo de touros:', err);
-      } finally {
-        if (ativo) {
-          setCarregandoTouros(false);
-        }
-      }
-    }
-
-    buscarInicial();
-
-    return () => {
-      ativo = false;
-    };
-  }, []);
-
-  // Ações de touros
-  const handleCadastrarTouro = async (dados: CreateBullDTO) => {
-    await BullRepository.create(dados);
-    await carregarTouros();
-  };
-
-  const handleAjustarDoses = async (touroId: string, delta: number) => {
-    try {
-      await BullRepository.adjustStraws(touroId, delta);
-      await carregarTouros();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Erro ao ajustar estoque';
-      Alert.alert('Atenção', msg);
-    }
-  };
 
   return (
     <ScrollView className="flex-1 bg-pasto-50" contentContainerClassName="gap-4 p-4 pb-16">
@@ -155,7 +98,7 @@ export default function TelaReproducao() {
                 : 'font-black text-xs text-gray-700'
             }
           >
-            Touros ({touros.length})
+            Touros ({totalTouros})
           </Text>
         </TouchableOpacity>
       </View>
@@ -177,7 +120,6 @@ export default function TelaReproducao() {
             farmId={DEFAULT_FARM_ID}
             vacaPreSelecionada={vacaPreSelecionada}
             onInseminacaoConcluida={() => {
-              carregarTouros();
               setRefreshHistorico((prev) => prev + 1);
             }}
           />
@@ -185,21 +127,13 @@ export default function TelaReproducao() {
           <HistoricoInseminacoesRecentes
             farmId={DEFAULT_FARM_ID}
             refreshTrigger={refreshHistorico}
-            onAtualizar={carregarTouros}
           />
         </View>
-      ) : carregandoTouros ? (
-        <View className="py-12 items-center justify-center">
-          <ActivityIndicator size="large" color="#1b4332" />
-          <Text className="mt-3 text-sm text-gray-500 font-medium">Carregando dados locais...</Text>
-        </View>
       ) : (
-        /* Seção: Catálogo de Touros e Estoque de Sêmen */
-        <CatalogoTouros
-          touros={touros}
-          onCadastrarTouro={handleCadastrarTouro}
-          onAjustarDoses={handleAjustarDoses}
+        /* Seção: Catálogo de Touros e Estoque de Sêmen gerenciada por @features/bulls */
+        <BullsScreen
           farmId={DEFAULT_FARM_ID}
+          onCountChange={setTotalTouros}
         />
       )}
     </ScrollView>

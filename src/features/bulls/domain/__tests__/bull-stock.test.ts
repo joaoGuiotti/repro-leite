@@ -1,4 +1,4 @@
-import { adjustBullStock, hasAvailableStraws } from '../../src/domain/bullStock';
+import { adjustBullStock, hasAvailableStraws } from '../bull-stock';
 
 describe('Domain: bullStock (Estoque de Doses de Sêmen)', () => {
   describe('adjustBullStock', () => {
