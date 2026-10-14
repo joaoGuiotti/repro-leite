@@ -3,8 +3,8 @@ import { PullEngine, PullResult } from './pull';
 import { OutboxRepository } from './outbox.repository';
 import { RemoteSyncGateway, defaultRemoteGateway } from '../network/api-client';
 import { networkMonitor, NetworkMonitor } from '../network/network-monitor';
-import { DEFAULT_FARM_ID, getDatabase } from '@/db/client';
-import * as schema from '@/db/schema';
+import { DEFAULT_FARM_ID, getDatabase } from '@core/db/client';
+import * as schema from '@core/db/schema';
 import { eq } from 'drizzle-orm';
 
 export interface SyncEngineStatus {

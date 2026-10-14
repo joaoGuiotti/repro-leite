@@ -1,8 +1,7 @@
-import React from 'react';
-import { View } from 'react-native';
+import { Botao, Cartao, Icon } from '@/ui';
 import { useRouter } from 'expo-router';
 import { Baby, PlusCircle, Share2 } from 'lucide-react-native';
-import { Botao, Cartao } from '@/ui';
+import { View } from 'react-native';
 
 export function QuickActionsCard() {
   const router = useRouter();
@@ -12,7 +11,7 @@ export function QuickActionsCard() {
       <View className="gap-2.5">
         <Botao
           titulo="Lançar Inseminação"
-          icone={<PlusCircle size={20} color="#ffffff" />}
+          icone={<Icon icon={PlusCircle} size="md" className="text-white" decorative />}
           onPress={() => router.push('/(tabs)/reproducao')}
           variante="primario"
           principal
@@ -21,7 +20,7 @@ export function QuickActionsCard() {
           <View className="flex-1">
             <Botao
               titulo="Cadastrar Bezerra"
-              icone={<Baby size={18} color="#1b4332" />}
+              icone={<Icon icon={Baby} size="sm" className="text-pasto-900 dark:text-pasto-200" decorative />}
               onPress={() => router.push('/(tabs)/bezerras')}
               variante="secundario"
             />
@@ -29,7 +28,7 @@ export function QuickActionsCard() {
           <View className="flex-1">
             <Botao
               titulo="Backup / WhatsApp"
-              icone={<Share2 size={18} color="#8a5a00" />}
+              icone={<Icon icon={Share2} size="sm" className="text-amber-800 dark:text-amber-300" decorative />}
               onPress={() => router.push('/(tabs)/ajustes')}
               variante="aviso"
             />

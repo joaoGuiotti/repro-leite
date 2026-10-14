@@ -1,9 +1,15 @@
-import { Botao, Cartao, ModalPadrao } from '@/ui';
+import {
+  Botao,
+  ModalPadrao,
+  EmptyState,
+  ListLoadingState,
+  AppIcons,
+  hapticFeedback,
+} from '@/ui';
 import { BadgeBrinco } from '@features/herd';
 import { History, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   Pressable,
   Text,
@@ -34,8 +40,8 @@ function obterFaseZootecnica(ia: InseminationWithAnimalSummary): {
   if (ia.result === 'prenhe') {
     return {
       texto: 'Gestação Confirmada',
-      badgeClasse: 'bg-pasto-100/80 border-pasto-300/70',
-      textoClasse: 'text-pasto-900',
+      badgeClasse: 'bg-pasto-100/80 border-pasto-300/70 dark:bg-pasto-950/60 dark:border-pasto-800',
+      textoClasse: 'text-pasto-900 dark:text-pasto-200',
     };
   }
 
@@ -44,23 +50,23 @@ function obterFaseZootecnica(ia: InseminationWithAnimalSummary): {
   if (ia.expectedHeatDate && hoje <= ia.expectedHeatDate) {
     return {
       texto: 'Aguardando Cio (Dia 21)',
-      badgeClasse: 'bg-amber-100/80 border-amber-300/70',
-      textoClasse: 'text-amber-900',
+      badgeClasse: 'bg-amber-100/80 border-amber-300/70 dark:bg-amber-950/60 dark:border-amber-800',
+      textoClasse: 'text-amber-900 dark:text-amber-200',
     };
   }
 
   if (ia.pregnancyCheckDate && hoje <= ia.pregnancyCheckDate) {
     return {
       texto: 'Aguardando Toque (Dia 45)',
-      badgeClasse: 'bg-celeste-100/80 border-celeste-300/70',
-      textoClasse: 'text-celeste-900',
+      badgeClasse: 'bg-celeste-100/80 border-celeste-300/70 dark:bg-celeste-950/60 dark:border-celeste-800',
+      textoClasse: 'text-celeste-900 dark:text-celeste-200',
     };
   }
 
   return {
     texto: 'Aguardando Diagnóstico',
-    badgeClasse: 'bg-amber-100/80 border-amber-300/70',
-    textoClasse: 'text-amber-900',
+    badgeClasse: 'bg-amber-100/80 border-amber-300/70 dark:bg-amber-950/60 dark:border-amber-800',
+    textoClasse: 'text-amber-900 dark:text-amber-200',
   };
 }
 
@@ -129,6 +135,7 @@ export function HistoricoInseminacoesRecentes({
       );
 
       if (res.ok) {
+        await hapticFeedback.success();
         Alert.alert(
           'Inseminação Excluída',
           'O registro foi cancelado e o status do animal foi recalculado com sucesso.'
@@ -137,6 +144,7 @@ export function HistoricoInseminacoesRecentes({
         void carregarHistorico();
         onAtualizar?.();
       } else {
+        await hapticFeedback.error();
         Alert.alert(
           'Erro ao Excluir',
           res.error.message || 'Não foi possível cancelar a inseminação.'
@@ -151,22 +159,20 @@ export function HistoricoInseminacoesRecentes({
 
   if (carregando) {
     return (
-      <View className="py-6 items-center justify-center">
-        <ActivityIndicator size="small" color="#1b4332" />
-        <Text className="text-xs text-gray-500 mt-2 font-medium">
-          Carregando histórico recente...
-        </Text>
+      <View className="py-4">
+        <ListLoadingState count={2} />
       </View>
     );
   }
 
   if (lista.length === 0) {
     return (
-      <Cartao className="p-4 items-center justify-center bg-gray-50 my-2">
-        <Text className="text-sm font-semibold text-gray-500">
-          Nenhuma inseminação registrada recentemente.
-        </Text>
-      </Cartao>
+      <EmptyState
+        icon={AppIcons.insemination}
+        title="Nenhuma inseminação recente"
+        description="Utilize o formulário de lançamento para registrar novas coberturas ou inseminações artificiais."
+        className="my-2"
+      />
     );
   }
 
@@ -175,12 +181,12 @@ export function HistoricoInseminacoesRecentes({
       {/* Cabeçalho da Seção */}
       <View className="flex-row items-center justify-between mb-0.5 px-1">
         <View className="flex-row items-center gap-1.5">
-          <History size={16} color="#4b5563" />
-          <Text className="text-xs font-black uppercase tracking-wider text-gray-700">
+          <History size={16} color="#6b7280" />
+          <Text className="text-xs font-black uppercase tracking-wider text-gray-700 dark:text-slate-300">
             Últimas Inseminações Realizadas
           </Text>
         </View>
-        <Text className="text-xs font-bold text-gray-400">
+        <Text className="text-xs font-bold text-gray-400 dark:text-slate-500">
           {lista.length} {lista.length === 1 ? 'registro' : 'registros'}
         </Text>
       </View>
@@ -191,7 +197,7 @@ export function HistoricoInseminacoesRecentes({
         return (
           <View
             key={ia.id}
-            className="p-3 bg-white border border-gray-200/90 rounded-2xl shadow-xs flex-row items-center gap-3"
+            className="p-3 bg-white dark:bg-slate-900 border border-gray-200/90 dark:border-slate-800 rounded-2xl shadow-xs flex-row items-center gap-3"
           >
             {/* 1. Badge do Brinco à esquerda */}
             <BadgeBrinco numero={ia.animalEarTag} tamanho="md" className="self-center" />
@@ -200,7 +206,7 @@ export function HistoricoInseminacoesRecentes({
             <View className="flex-1 min-w-0 justify-center">
               {/* Linha 1: Nome do animal e Pílula de Fase (sem estado 'inseminada' redundante) */}
               <View className="flex-row items-center gap-2 flex-wrap">
-                <Text className="text-base font-black text-gray-950" numberOfLines={1}>
+                <Text className="text-base font-black text-gray-950 dark:text-slate-100" numberOfLines={1}>
                   {ia.animalName || `Animal #${ia.animalEarTag}`}
                 </Text>
                 <View className={`px-2 py-0.5 rounded-full border ${fase.badgeClasse}`}>
@@ -212,17 +218,17 @@ export function HistoricoInseminacoesRecentes({
 
               {/* Linha 2: Touro e Data da IA */}
               <View className="flex-row items-center flex-wrap gap-x-1.5 mt-0.5">
-                <Text className="text-xs text-gray-600" numberOfLines={1}>
-                  Touro: <Text className="font-bold text-gray-900">{ia.bullName}</Text>
+                <Text className="text-xs text-gray-600 dark:text-slate-400" numberOfLines={1}>
+                  Touro: <Text className="font-bold text-gray-900 dark:text-slate-200">{ia.bullName}</Text>
                 </Text>
-                <Text className="text-xs text-gray-300">·</Text>
-                <Text className="text-xs text-gray-600">
-                  IA em <Text className="font-bold text-gray-900">{formatarDataBR(ia.date)}</Text>
+                <Text className="text-xs text-gray-300 dark:text-slate-600">·</Text>
+                <Text className="text-xs text-gray-600 dark:text-slate-400">
+                  IA em <Text className="font-bold text-gray-900 dark:text-slate-200">{formatarDataBR(ia.date)}</Text>
                 </Text>
                 {ia.inseminator ? (
                   <>
-                    <Text className="text-xs text-gray-300">·</Text>
-                    <Text className="text-xs text-gray-500" numberOfLines={1}>
+                    <Text className="text-xs text-gray-300 dark:text-slate-600">·</Text>
+                    <Text className="text-xs text-gray-500 dark:text-slate-400" numberOfLines={1}>
                       {ia.inseminator}
                     </Text>
                   </>
@@ -231,28 +237,28 @@ export function HistoricoInseminacoesRecentes({
 
               {/* Linha 3: Projeções Zootécnicas inline compactas */}
               <View className="flex-row items-center flex-wrap gap-x-1.5 gap-y-0.5 mt-1">
-                <Text className="text-xs text-gray-500">
-                  Cio 21d: <Text className="font-bold text-gray-800">{formatarDataBR(ia.expectedHeatDate)}</Text>
+                <Text className="text-xs text-gray-500 dark:text-slate-400">
+                  Cio 21d: <Text className="font-bold text-gray-800 dark:text-slate-200">{formatarDataBR(ia.expectedHeatDate)}</Text>
                 </Text>
-                <Text className="text-xs text-gray-300">·</Text>
-                <Text className="text-xs text-gray-500">
-                  Toque 45d: <Text className="font-bold text-gray-800">{formatarDataBR(ia.pregnancyCheckDate)}</Text>
+                <Text className="text-xs text-gray-300 dark:text-slate-600">·</Text>
+                <Text className="text-xs text-gray-500 dark:text-slate-400">
+                  Toque 45d: <Text className="font-bold text-gray-800 dark:text-slate-200">{formatarDataBR(ia.pregnancyCheckDate)}</Text>
                 </Text>
-                <Text className="text-xs text-gray-300">·</Text>
-                <Text className="text-xs text-gray-500">
-                  Parto: <Text className="font-bold text-gray-800">{formatarDataBR(ia.expectedCalvingDate)}</Text>
+                <Text className="text-xs text-gray-300 dark:text-slate-600">·</Text>
+                <Text className="text-xs text-gray-500 dark:text-slate-400">
+                  Parto: <Text className="font-bold text-gray-800 dark:text-slate-200">{formatarDataBR(ia.expectedCalvingDate)}</Text>
                 </Text>
               </View>
 
               {/* Observação opcional */}
               {ia.notes ? (
-                <Text className="text-xs text-gray-500 italic mt-1" numberOfLines={1}>
+                <Text className="text-xs text-gray-500 dark:text-slate-400 italic mt-1" numberOfLines={1}>
                   &ldquo;{ia.notes}&rdquo;
                 </Text>
               ) : null}
             </View>
 
-            {/* 3. Botão de Cancelar/Estornar Inseminação à direita */}
+            {/* 3. Botão de Cancelar/Estornar Inseminação à direita com Alvo >= 48dp */}
             <TouchableOpacity
               accessibilityRole="button"
               accessibilityLabel={`Cancelar inseminação da vaca ${ia.animalEarTag}`}
@@ -260,9 +266,9 @@ export function HistoricoInseminacoesRecentes({
                 setDevolverDose(!!ia.bullId);
                 setIaParaExcluir(ia);
               }}
-              className="h-9 w-9 items-center justify-center rounded-xl bg-gray-50 border border-gray-200 active:bg-alerta-100 self-center"
+              className="min-h-[48px] min-w-[48px] items-center justify-center rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 active:bg-red-50 dark:active:bg-red-950/40 self-center"
             >
-              <Trash2 size={16} color="#991b1b" />
+              <Trash2 size={18} color="#dc2626" />
             </TouchableOpacity>
           </View>
         );
@@ -301,10 +307,10 @@ export function HistoricoInseminacoesRecentes({
         }
       >
         <View className="py-2">
-          <Text className="text-sm text-gray-700 leading-5">
+          <Text className="text-sm text-gray-700 dark:text-slate-300 leading-5">
             Tem certeza de que deseja cancelar este registro de inseminação?
           </Text>
-          <Text className="text-xs text-gray-500 mt-2 leading-4">
+          <Text className="text-xs text-gray-500 dark:text-slate-400 mt-2 leading-4">
             • Os alertas gerados (+21d cio e +45d toque) serão cancelados.{'\n'}
             • O status reprodutivo da fêmea será recalculado automaticamente para refletir o histórico ativo remanescente.
           </Text>
@@ -312,18 +318,18 @@ export function HistoricoInseminacoesRecentes({
           {iaParaExcluir?.bullId && (
             <Pressable
               onPress={() => setDevolverDose(!devolverDose)}
-              className="mt-4 flex-row items-center gap-2 p-3 rounded-xl border border-gray-200 bg-gray-50 active:bg-gray-100"
+              className="mt-4 flex-row items-center gap-2 p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-800/60 active:bg-gray-100 dark:active:bg-slate-800"
             >
               <View
                 className={`h-5 w-5 rounded border items-center justify-center ${
                   devolverDose
-                    ? 'bg-pasto-900 border-pasto-900'
-                    : 'bg-white border-gray-400'
+                    ? 'bg-pasto-900 border-pasto-900 dark:bg-pasto-700 dark:border-pasto-600'
+                    : 'bg-white dark:bg-slate-900 border-gray-400 dark:border-slate-600'
                 }`}
               >
                 {devolverDose && <Text className="text-white text-xs font-bold">✓</Text>}
               </View>
-              <Text className="text-xs font-bold text-gray-800 flex-1">
+              <Text className="text-xs font-bold text-gray-800 dark:text-slate-100 flex-1">
                 Devolver 1 dose de sêmen ao estoque do touro {iaParaExcluir.bullName}
               </Text>
             </Pressable>

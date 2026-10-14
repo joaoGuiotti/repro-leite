@@ -40,19 +40,19 @@ export function BadgeBrinco({
 
   const configsVariante = {
     padrao: {
-      caixa: 'bg-white border border-gray-200/90 shadow-xs',
-      rotulo: 'text-slate-400',
-      numero: 'text-gray-950',
+      caixa: 'bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 shadow-xs',
+      rotulo: 'text-slate-400 dark:text-slate-500',
+      numero: 'text-gray-950 dark:text-slate-100',
     },
     destaque: {
-      caixa: 'bg-pasto-50 border border-pasto-300 shadow-xs',
-      rotulo: 'text-pasto-700',
-      numero: 'text-pasto-950',
+      caixa: 'bg-pasto-50 dark:bg-pasto-950/60 border border-pasto-300 dark:border-pasto-800 shadow-xs',
+      rotulo: 'text-pasto-700 dark:text-pasto-400',
+      numero: 'text-pasto-950 dark:text-pasto-200',
     },
     inativo: {
-      caixa: 'bg-amber-50/80 border border-amber-200 shadow-xs',
-      rotulo: 'text-amber-600/70',
-      numero: 'text-amber-950',
+      caixa: 'bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 shadow-xs',
+      rotulo: 'text-amber-600/70 dark:text-amber-400/70',
+      numero: 'text-amber-950 dark:text-amber-300',
     },
   }[variante];
 

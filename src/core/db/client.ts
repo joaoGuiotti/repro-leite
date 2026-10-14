@@ -48,12 +48,37 @@ export function generateUUID(): string {
 }
 
 /**
+ * Adiciona uma coluna à tabela caso ela ainda não exista (migração idempotente).
+ */
+function addColumnIfNotExists(
+  rawDb: ReturnType<typeof getExpoDatabase>,
+  tableName: string,
+  columnName: string,
+  columnDef: string
+): void {
+  try {
+    let exists = false;
+    if (typeof rawDb.getAllSync === 'function') {
+      const tableInfo = rawDb.getAllSync<{ name: string }>(`PRAGMA table_info(${tableName});`);
+      if (Array.isArray(tableInfo) && tableInfo.length > 0) {
+        exists = tableInfo.some((col) => col.name === columnName);
+      }
+    }
+    if (!exists) {
+      rawDb.execSync(`ALTER TABLE ${tableName} ADD COLUMN ${columnDef};`);
+    }
+  } catch {
+    // Se a coluna já existir no SQLite ou falhar por duplicação, ignora com segurança
+  }
+}
+
+/**
  * Inicializa as tabelas do banco local e garante a existência da fazenda padrão.
  */
 export async function initDatabase(): Promise<void> {
   const rawDb = getExpoDatabase();
 
-  // Criação idempotente das tabelas da fundação core
+  // 1. Criação idempotente das tabelas da fundação core (sem índices dependentes de migrações)
   rawDb.execSync(`
     PRAGMA foreign_keys = ON;
 
@@ -76,8 +101,6 @@ export async function initDatabase(): Promise<void> {
       deleted_at TEXT
     );
 
-    CREATE UNIQUE INDEX IF NOT EXISTS settings_farm_key_idx ON settings(farm_id, key);
-
     CREATE TABLE IF NOT EXISTS sync_queue (
       id TEXT PRIMARY KEY NOT NULL,
       operation_id TEXT,
@@ -93,9 +116,6 @@ export async function initDatabase(): Promise<void> {
       created_at TEXT NOT NULL,
       updated_at TEXT
     );
-
-    CREATE INDEX IF NOT EXISTS idx_sync_queue_status_retry 
-    ON sync_queue (farm_id, status, next_retry_at);
 
     CREATE TABLE IF NOT EXISTS sync_state (
       id TEXT PRIMARY KEY NOT NULL,
@@ -122,18 +142,17 @@ export async function initDatabase(): Promise<void> {
       exit_status TEXT NOT NULL DEFAULT 'ativo',
       exit_date TEXT,
       exit_reason TEXT,
+      sire_id TEXT,
+      sire_name TEXT,
+      dam_id TEXT,
+      dam_name TEXT,
+      maternal_grandsire_name TEXT,
+      paternal_grandsire_name TEXT,
       notes TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       deleted_at TEXT
     );
-
-    CREATE UNIQUE INDEX IF NOT EXISTS idx_animals_farm_ear_tag_active 
-    ON animals (farm_id, ear_tag_normalized) 
-    WHERE deleted_at IS NULL AND exit_status = 'ativo';
-
-    CREATE INDEX IF NOT EXISTS idx_animals_farm_status 
-    ON animals (farm_id, exit_status, repro_status, deleted_at);
 
     CREATE TABLE IF NOT EXISTS bulls (
       id TEXT PRIMARY KEY NOT NULL,
@@ -147,9 +166,6 @@ export async function initDatabase(): Promise<void> {
       updated_at TEXT NOT NULL,
       deleted_at TEXT
     );
-
-    CREATE INDEX IF NOT EXISTS idx_bulls_farm 
-    ON bulls (farm_id, deleted_at);
 
     CREATE TABLE IF NOT EXISTS inseminations (
       id TEXT PRIMARY KEY NOT NULL,
@@ -170,12 +186,6 @@ export async function initDatabase(): Promise<void> {
       deleted_at TEXT
     );
 
-    CREATE INDEX IF NOT EXISTS idx_inseminations_farm 
-    ON inseminations (farm_id, deleted_at);
-
-    CREATE INDEX IF NOT EXISTS idx_inseminations_animal 
-    ON inseminations (animal_id, date, deleted_at);
-
     CREATE TABLE IF NOT EXISTS alerts (
       id TEXT PRIMARY KEY NOT NULL,
       farm_id TEXT NOT NULL REFERENCES farms(id),
@@ -189,6 +199,60 @@ export async function initDatabase(): Promise<void> {
       updated_at TEXT NOT NULL,
       deleted_at TEXT
     );
+  `);
+
+  // 2. Migrações incrementais para tabelas pré-existentes (executadas ANTES da criação de índices)
+  const animalCols = [
+    { name: 'sire_id', def: 'sire_id TEXT' },
+    { name: 'sire_name', def: 'sire_name TEXT' },
+    { name: 'dam_id', def: 'dam_id TEXT' },
+    { name: 'dam_name', def: 'dam_name TEXT' },
+    { name: 'maternal_grandsire_name', def: 'maternal_grandsire_name TEXT' },
+    { name: 'paternal_grandsire_name', def: 'paternal_grandsire_name TEXT' },
+  ];
+  for (const col of animalCols) {
+    addColumnIfNotExists(rawDb, 'animals', col.name, col.def);
+  }
+
+  const syncQueueCols = [
+    { name: 'operation_id', def: 'operation_id TEXT' },
+    { name: 'status', def: "status TEXT NOT NULL DEFAULT 'pending'" },
+    { name: 'next_retry_at', def: 'next_retry_at TEXT' },
+    { name: 'updated_at', def: 'updated_at TEXT' },
+  ];
+  for (const col of syncQueueCols) {
+    addColumnIfNotExists(rawDb, 'sync_queue', col.name, col.def);
+  }
+
+  const syncStateCols = [
+    { name: 'server_rev', def: 'server_rev INTEGER DEFAULT 0' },
+  ];
+  for (const col of syncStateCols) {
+    addColumnIfNotExists(rawDb, 'sync_state', col.name, col.def);
+  }
+
+  // 3. Criação idempotente dos índices (garantido que todas as colunas existem)
+  rawDb.execSync(`
+    CREATE UNIQUE INDEX IF NOT EXISTS settings_farm_key_idx ON settings(farm_id, key);
+
+    CREATE INDEX IF NOT EXISTS idx_sync_queue_status_retry 
+    ON sync_queue (farm_id, status, next_retry_at);
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_animals_farm_ear_tag_active 
+    ON animals (farm_id, ear_tag_normalized) 
+    WHERE deleted_at IS NULL AND exit_status = 'ativo';
+
+    CREATE INDEX IF NOT EXISTS idx_animals_farm_status 
+    ON animals (farm_id, exit_status, repro_status, deleted_at);
+
+    CREATE INDEX IF NOT EXISTS idx_bulls_farm 
+    ON bulls (farm_id, deleted_at);
+
+    CREATE INDEX IF NOT EXISTS idx_inseminations_farm 
+    ON inseminations (farm_id, deleted_at);
+
+    CREATE INDEX IF NOT EXISTS idx_inseminations_animal 
+    ON inseminations (animal_id, date, deleted_at);
 
     CREATE INDEX IF NOT EXISTS idx_alerts_farm_due 
     ON alerts (farm_id, due_date, completed_at, deleted_at);
@@ -197,47 +261,7 @@ export async function initDatabase(): Promise<void> {
     ON alerts (source_id, deleted_at);
   `);
 
-  // Garante que colunas de filiação existam na tabela animals se já foi criada previamente
-  const colsToAdd = [
-    'sire_id TEXT',
-    'sire_name TEXT',
-    'dam_id TEXT',
-    'dam_name TEXT',
-    'maternal_grandsire_name TEXT',
-    'paternal_grandsire_name TEXT',
-  ];
-  for (const col of colsToAdd) {
-    try {
-      rawDb.execSync(`ALTER TABLE animals ADD COLUMN ${col};`);
-    } catch {
-      // Ignora erro se coluna já existir
-    }
-  }
-
-  // Migrações incrementais para sync_queue e sync_state
-  const syncQueueCols = [
-    'operation_id TEXT',
-    "status TEXT NOT NULL DEFAULT 'pending'",
-    'next_retry_at TEXT',
-    'updated_at TEXT',
-  ];
-  for (const col of syncQueueCols) {
-    try {
-      rawDb.execSync(`ALTER TABLE sync_queue ADD COLUMN ${col};`);
-    } catch {
-      // Ignora erro se coluna já existir
-    }
-  }
-
-  const syncStateCols = ['server_rev INTEGER DEFAULT 0'];
-  for (const col of syncStateCols) {
-    try {
-      rawDb.execSync(`ALTER TABLE sync_state ADD COLUMN ${col};`);
-    } catch {
-      // Ignora erro se coluna já existir
-    }
-  }
-
+  // 4. Garante a existência da fazenda padrão para uso offline imediato
   await ensureDefaultFarm();
 }
 

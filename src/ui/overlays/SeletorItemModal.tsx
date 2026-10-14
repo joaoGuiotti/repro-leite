@@ -41,10 +41,10 @@ export interface SeletorItemModalProps {
 }
 
 const BADGE_CORES = {
-  sucesso: 'bg-pasto-100 text-pasto-900 border-pasto-300',
-  atencao: 'bg-ambar-100 text-ambar-800 border-ambar-300',
-  alerta: 'bg-alerta-100 text-alerta-800 border-alerta-300',
-  neutro: 'bg-gray-100 text-gray-800 border-gray-300',
+  sucesso: 'bg-pasto-100 dark:bg-pasto-950/60 text-pasto-900 dark:text-pasto-200 border-pasto-300 dark:border-pasto-800',
+  atencao: 'bg-ambar-100 dark:bg-amber-950/60 text-ambar-800 dark:text-amber-200 border-ambar-300 dark:border-amber-800',
+  alerta: 'bg-alerta-100 dark:bg-red-950/60 text-alerta-800 dark:text-red-200 border-alerta-300 dark:border-red-800',
+  neutro: 'bg-gray-100 dark:bg-slate-800 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-slate-700',
 } as const;
 
 export function SeletorItemModal({
@@ -94,15 +94,15 @@ export function SeletorItemModal({
     >
       <View className="w-full">
         {/* Barra de Busca Ágil */}
-        <View className="flex-row items-center bg-gray-100 rounded-xl px-3 py-2.5 mb-3 border border-gray-200">
-          <Search size={20} color="#6b7280" />
+        <View className="flex-row items-center bg-gray-100 dark:bg-slate-800 rounded-xl px-3 py-2.5 mb-3 border border-gray-200 dark:border-slate-700">
+          <Search size={20} color="#94a3b8" />
           <TextInput
             value={termoBusca}
             onChangeText={setTermoBusca}
             placeholder={placeholderBusca}
-            placeholderTextColor="#9ca3af"
+            placeholderTextColor="#94a3b8"
             keyboardType={tipoTeclado}
-            className="flex-1 ml-2 text-base font-semibold text-gray-900 min-h-10"
+            className="flex-1 ml-2 text-base font-semibold text-gray-900 dark:text-slate-100 min-h-10"
             autoFocus={false}
           />
         </View>
@@ -120,13 +120,13 @@ export function SeletorItemModal({
                   accessibilityLabel={`Filtrar por ${f.label}`}
                   className={`px-3 py-1.5 rounded-full border ${
                     ativo
-                      ? 'bg-pasto-900 border-pasto-900'
-                      : 'bg-white border-gray-300'
+                      ? 'bg-pasto-900 dark:bg-pasto-700 border-pasto-900 dark:border-pasto-600'
+                      : 'bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-700'
                   }`}
                 >
                   <Text
                     className={`text-xs font-bold ${
-                      ativo ? 'text-white' : 'text-gray-700'
+                      ativo ? 'text-white' : 'text-gray-700 dark:text-gray-200'
                     }`}
                   >
                     {f.label}
@@ -156,27 +156,27 @@ export function SeletorItemModal({
                   onPress={() => selecionarItem(item)}
                   className={`min-h-14 flex-row items-center justify-between p-3 my-1 rounded-xl border ${
                     selecionado
-                      ? 'bg-pasto-50 border-pasto-600'
-                      : 'bg-white border-gray-200 active:bg-gray-50'
+                      ? 'bg-pasto-50 dark:bg-pasto-950/40 border-pasto-600 dark:border-pasto-500'
+                      : 'bg-white dark:bg-slate-900 border-gray-200 dark:border-slate-800 active:bg-gray-50 dark:active:bg-slate-800'
                   } ${item.disabled ? 'opacity-40' : ''}`}
                 >
                   <View className="flex-1 pr-2 flex-row items-center gap-3">
                     {item.numeroBrinco ? (
-                      <View className="min-w-[44px] min-h-[42px] px-1.5 py-1 rounded-xl bg-white border border-gray-200/90 items-center justify-center">
-                        <Text className="text-[8px] font-black uppercase tracking-wider text-slate-400" numberOfLines={1}>
+                      <View className="min-w-[44px] min-h-[42px] px-1.5 py-1 rounded-xl bg-white dark:bg-slate-800 border border-gray-200/90 dark:border-slate-700 items-center justify-center">
+                        <Text className="text-[8px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500" numberOfLines={1}>
                           BRINCO
                         </Text>
-                        <Text className="text-sm font-black tracking-tight leading-tight text-gray-950" numberOfLines={1}>
+                        <Text className="text-sm font-black tracking-tight leading-tight text-gray-950 dark:text-slate-100" numberOfLines={1}>
                           {item.numeroBrinco}
                         </Text>
                       </View>
                     ) : null}
                     <View className="flex-1">
-                      <Text className="text-base font-bold text-gray-900" numberOfLines={1}>
+                      <Text className="text-base font-bold text-gray-900 dark:text-slate-100" numberOfLines={1}>
                         {item.tituloPrincipal}
                       </Text>
                       {item.subtitulo && (
-                        <Text className="text-xs text-gray-500 mt-0.5" numberOfLines={1}>
+                        <Text className="text-xs text-gray-500 dark:text-gray-400 mt-0.5" numberOfLines={1}>
                           {item.subtitulo}
                         </Text>
                       )}
@@ -191,14 +191,18 @@ export function SeletorItemModal({
                         </Text>
                       </View>
                     )}
-                    {selecionado && <Check size={20} color="#1b4332" />}
+                    {selecionado && (
+                      <View className="h-6 w-6 items-center justify-center rounded-full bg-pasto-100 dark:bg-pasto-950/60">
+                        <Check size={16} color="#1b4332" className="dark:text-pasto-300" />
+                      </View>
+                    )}
                   </View>
                 </Pressable>
               );
             }}
             ListEmptyComponent={
               <View className="py-8 items-center justify-center">
-                <Text className="text-sm font-semibold text-gray-500">
+                <Text className="text-sm font-semibold text-gray-500 dark:text-gray-400">
                   Nenhum registro encontrado.
                 </Text>
               </View>

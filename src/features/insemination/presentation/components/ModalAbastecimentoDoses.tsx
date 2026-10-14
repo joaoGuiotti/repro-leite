@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Alert, Text, View } from 'react-native';
 import { PlusCircle } from 'lucide-react-native';
-import { Botao, CampoNumerico, ModalPadrao } from '@/ui';
+import { Botao, CampoNumerico, Icon, ModalPadrao } from '@/ui';
 import { BullRecord, getBullsUseCases } from '@features/bulls';
 
 export interface ModalAbastecimentoDosesProps {
@@ -55,7 +55,7 @@ export function ModalAbastecimentoDoses({
       onFechar={onFechar}
       titulo="Abastecer Doses de Sêmen"
       subtitulo={`Touro: ${touro.name} (${touro.breed})`}
-      iconeTitulo={<PlusCircle size={24} color="#1b4332" />}
+      iconeTitulo={<Icon icon={PlusCircle} size="lg" className="text-pasto-700 dark:text-pasto-300" decorative />}
       larguraMaxima="max-w-md"
       rodape={
         <View className="flex-row gap-3">
@@ -79,9 +79,9 @@ export function ModalAbastecimentoDoses({
       }
     >
       <View className="py-2">
-        <Text className="text-sm text-gray-600 mb-4 leading-5">
+        <Text className="text-sm text-gray-600 dark:text-slate-300 mb-4 leading-5">
           Informe a quantidade de novas palhetas recebidas no botijão para este reprodutor. O saldo atual é de{' '}
-          <Text className="font-bold text-gray-900">{touro.strawsInStock} doses</Text>.
+          <Text className="font-bold text-gray-900 dark:text-slate-100">{touro.strawsInStock} doses</Text>.
         </Text>
 
         <CampoNumerico
@@ -95,3 +95,4 @@ export function ModalAbastecimentoDoses({
     </ModalPadrao>
   );
 }
+

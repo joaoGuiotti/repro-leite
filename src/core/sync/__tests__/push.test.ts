@@ -1,7 +1,7 @@
 import { PushEngine } from '../push';
 import { OutboxRepository } from '../outbox.repository';
 import { FakeRemoteSyncGateway } from '../../network/api-client';
-import * as schema from '@/db/schema';
+import * as schema from '@core/db/schema';
 
 describe('Sync: PushEngine', () => {
   let gateway: FakeRemoteSyncGateway;

@@ -75,17 +75,18 @@ export function ModalCadastroTouro({
     >
       <ScrollView contentContainerClassName="p-4 gap-4 pb-8">
         <View className="mb-3">
-          <Text className="mb-1 text-sm font-semibold text-gray-700">Nome do Touro *</Text>
+          <Text className="mb-1 text-sm font-semibold text-gray-700 dark:text-gray-300">Nome do Touro *</Text>
           <TextInput
             value={nome}
             onChangeText={setNome}
             placeholder="Ex: Jaguar TE"
-            className="h-12 rounded-xl border border-gray-300 bg-white px-4 text-base text-gray-900"
+            placeholderTextColor="#94a3b8"
+            className="h-12 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 text-base text-gray-900 dark:text-slate-100"
           />
         </View>
 
         <View className="mb-3">
-          <Text className="mb-1 text-sm font-semibold text-gray-700">Raça *</Text>
+          <Text className="mb-1 text-sm font-semibold text-gray-700 dark:text-gray-300">Raça *</Text>
           <View className="flex-row flex-wrap gap-1.5 mb-2">
             {RACAS_SUGERIDAS.map((r) => (
               <TouchableOpacity
@@ -93,13 +94,13 @@ export function ModalCadastroTouro({
                 onPress={() => setRaca(r)}
                 className={`px-3 py-1.5 rounded-xl border ${
                   raca === r
-                    ? 'bg-pasto-100 border-pasto-700'
-                    : 'bg-gray-50 border-gray-200'
+                    ? 'bg-pasto-100 dark:bg-pasto-950/60 border-pasto-700 dark:border-pasto-600'
+                    : 'bg-gray-50 dark:bg-slate-800 border-gray-200 dark:border-slate-700'
                 }`}
               >
                 <Text
                   className={`text-xs font-bold ${
-                    raca === r ? 'text-pasto-900' : 'text-gray-700'
+                    raca === r ? 'text-pasto-900 dark:text-pasto-200' : 'text-gray-700 dark:text-gray-300'
                   }`}
                 >
                   {r}
@@ -111,19 +112,21 @@ export function ModalCadastroTouro({
             value={raca}
             onChangeText={setRaca}
             placeholder="Digite ou selecione a raça"
-            className="h-12 rounded-xl border border-gray-300 bg-white px-4 text-base text-gray-900"
+            placeholderTextColor="#94a3b8"
+            className="h-12 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 text-base text-gray-900 dark:text-slate-100"
           />
         </View>
 
         <View className="mb-3">
-          <Text className="mb-1 text-sm font-semibold text-gray-700">
+          <Text className="mb-1 text-sm font-semibold text-gray-700 dark:text-gray-300">
             Código da Palheta / Registro (Opcional)
           </Text>
           <TextInput
             value={codigo}
             onChangeText={setCodigo}
             placeholder="Ex: GIR-8821"
-            className="h-12 rounded-xl border border-gray-300 bg-white px-4 text-base text-gray-900"
+            placeholderTextColor="#94a3b8"
+            className="h-12 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 text-base text-gray-900 dark:text-slate-100"
           />
         </View>
 
@@ -136,14 +139,15 @@ export function ModalCadastroTouro({
         />
 
         <View className="mt-3">
-          <Text className="mb-1 text-sm font-semibold text-gray-700">
+          <Text className="mb-1 text-sm font-semibold text-gray-700 dark:text-gray-300">
             Observações / Linhagem (Opcional)
           </Text>
           <TextInput
             value={observacoes}
             onChangeText={setObservacoes}
             placeholder="Ex: Touro provado para leite, recomendado para novilhas"
-            className="h-16 rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900"
+            placeholderTextColor="#94a3b8"
+            className="h-16 rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2 text-sm text-gray-900 dark:text-slate-100"
             multiline
           />
         </View>

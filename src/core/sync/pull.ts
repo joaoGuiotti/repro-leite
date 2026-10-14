@@ -1,5 +1,5 @@
-import { getDatabase, getExpoDatabase } from '@/db/client';
-import * as schema from '@/db/schema';
+import { getDatabase, getExpoDatabase } from '@core/db/client';
+import * as schema from '@core/db/schema';
 import { eq } from 'drizzle-orm';
 import { RemoteSyncGateway, RemoteRecordChange } from '../network/api-client';
 import { ConflictResolver } from './conflict-resolver';

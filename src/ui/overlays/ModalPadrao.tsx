@@ -3,7 +3,6 @@ import {
   Modal as RNModal,
   Pressable,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { X } from 'lucide-react-native';
@@ -67,23 +66,23 @@ export function ModalPadrao({
           />
         )}
 
-        {/* Card Branco Padronizado com cantos arredondados e sombra */}
+        {/* Card Padronizado com cantos arredondados e sombra */}
         <View
-          className={`w-full ${larguraMaxima} max-h-[90%] rounded-3xl bg-white p-5 shadow-2xl ${classNameCard}`}
+          className={`w-full ${larguraMaxima} max-h-[90%] rounded-3xl bg-surface dark:bg-slate-900 border border-gray-100 dark:border-slate-800 p-5 shadow-2xl ${classNameCard}`}
         >
           {/* Topo / Cabeçalho Opcional */}
           {(titulo || exibirBotaoFechar) && (
-            <View className="flex-row items-center justify-between pb-3 mb-2 border-b border-gray-100">
+            <View className="flex-row items-center justify-between pb-3 mb-2 border-b border-gray-100 dark:border-slate-800">
               <View className="flex-1 mr-3 flex-row items-center gap-2">
                 {iconeTitulo}
                 <View className="flex-1">
                   {titulo && (
-                    <Text className="text-xl font-black text-gray-900">
+                    <Text className="text-xl font-black text-gray-900 dark:text-slate-100">
                       {titulo}
                     </Text>
                   )}
                   {subtitulo && (
-                    <Text className="text-xs text-gray-500 mt-0.5">
+                    <Text className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                       {subtitulo}
                     </Text>
                   )}
@@ -91,15 +90,15 @@ export function ModalPadrao({
               </View>
 
               {exibirBotaoFechar && (
-                <TouchableOpacity
+                <Pressable
                   onPress={onFechar}
                   hitSlop={{ top: 16, bottom: 16, left: 16, right: 16 }}
                   accessibilityLabel="Fechar formulário"
                   accessibilityRole="button"
-                  className="h-9 w-9 items-center justify-center rounded-full bg-gray-100 active:bg-gray-200"
+                  className="h-9 w-9 items-center justify-center rounded-full bg-gray-100 dark:bg-slate-800 active:bg-gray-200 dark:active:bg-slate-700"
                 >
-                  <X size={18} color="#4b5563" />
-                </TouchableOpacity>
+                  <X size={18} color="#94a3b8" />
+                </Pressable>
               )}
             </View>
           )}
@@ -113,7 +112,7 @@ export function ModalPadrao({
 
           {/* Rodapé Fixo Opcional */}
           {rodape && (
-            <View className="pt-3 mt-2 border-t border-gray-100">{rodape}</View>
+            <View className="pt-3 mt-2 border-t border-gray-100 dark:border-slate-800">{rodape}</View>
           )}
         </View>
       </View>

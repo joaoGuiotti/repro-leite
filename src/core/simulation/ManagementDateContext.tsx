@@ -1,12 +1,12 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 import {
   getRealTodayDateString,
   advanceDays as domainAdvanceDays,
   isSimulatedDate,
   parseDateString,
 } from './date-simulation';
-import { SettingsRepository } from '@/db/repositories/settingsRepository';
-import { DEFAULT_FARM_ID } from '@/db/client';
+import { getExpoDatabase, DEFAULT_FARM_ID } from '@core/db';
+import { generateId } from '@core/utils/id';
 
 export interface ManagementDateContextType {
   activeDateString: string;
@@ -21,31 +21,48 @@ const ManagementDateContext = createContext<ManagementDateContextType | null>(nu
 
 const SETTING_KEY = 'simulated_management_date';
 
-export function ManagementDateProvider({ children }: { children: ReactNode }) {
-  const [activeDateString, setActiveDateStringState] = useState<string>(getRealTodayDateString());
-
-  // Carrega persistência inicial do SQLite
-  useEffect(() => {
-    let isMounted = true;
-    async function loadPersistedDate() {
-      try {
-        const persisted = await SettingsRepository.getSetting(DEFAULT_FARM_ID, SETTING_KEY);
-        if (isMounted && persisted) {
-          setActiveDateStringState(persisted);
-        }
-      } catch {
-        // Fallback silencioso para data de hoje se o banco ainda não estiver pronto
+function loadSimulatedDateFromDb(): string | null {
+  try {
+    const rawDb = getExpoDatabase();
+    if (typeof rawDb.getAllSync === 'function') {
+      const rows = rawDb.getAllSync<{ value: string }>(
+        'SELECT value FROM settings WHERE farm_id = ? AND key = ? AND deleted_at IS NULL LIMIT 1;',
+        [DEFAULT_FARM_ID, SETTING_KEY]
+      );
+      if (Array.isArray(rows) && rows.length > 0) {
+        return rows[0].value;
       }
     }
-    loadPersistedDate();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  } catch {
+    // Fallback silencioso se o banco ainda não estiver pronto
+  }
+  return null;
+}
+
+function saveSimulatedDateToDb(newDateStr: string): void {
+  try {
+    const rawDb = getExpoDatabase();
+    const now = new Date().toISOString();
+    const id = generateId();
+    rawDb.runSync(
+      `INSERT INTO settings (id, farm_id, key, value, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?)
+       ON CONFLICT(farm_id, key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at, deleted_at = NULL;`,
+      [id, DEFAULT_FARM_ID, SETTING_KEY, newDateStr, now, now]
+    );
+  } catch {
+    // Fallback silencioso
+  }
+}
+
+export function ManagementDateProvider({ children }: { children: ReactNode }) {
+  const [activeDateString, setActiveDateStringState] = useState<string>(
+    () => loadSimulatedDateFromDb() || getRealTodayDateString()
+  );
 
   const updateDate = (newDateStr: string) => {
     setActiveDateStringState(newDateStr);
-    SettingsRepository.setSetting(DEFAULT_FARM_ID, SETTING_KEY, newDateStr).catch(() => {});
+    saveSimulatedDateToDb(newDateStr);
   };
 
   const advanceDays = (days: number) => {

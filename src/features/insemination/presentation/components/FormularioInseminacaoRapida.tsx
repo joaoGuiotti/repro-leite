@@ -10,13 +10,13 @@ import {
   ItemSeletor,
   SelectDate,
   SeletorItemModal,
+  hapticFeedback,
 } from '@/ui';
 import { PainelProjecaoZootecnica } from '@features/reproduction';
 import { CheckCircle2, ChevronDown, Repeat } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Alert,
-  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -257,6 +257,7 @@ export function FormularioInseminacaoRapida({
         return;
       }
 
+      await hapticFeedback.success();
       Alert.alert(
         'Inseminação Registrada! 🐮',
         `A vaca Brinco ${vacaSelecionada.earTag} foi marcada como Inseminada com sucesso.`
@@ -289,19 +290,18 @@ export function FormularioInseminacaoRapida({
   };
 
   return (
-    <ScrollView className="flex-1" keyboardShouldPersistTaps="handled">
-      <View className="gap-3.5 pb-12">
-        {/* Cabeçalho Limpo e Compacto */}
+    <View className="gap-3.5">
+      {/* Cabeçalho Limpo e Compacto */}
         <View className="mb-0.5">
           <View className="flex-row items-center gap-2">
-            <View className="w-7 h-7 rounded-full bg-emerald-100 items-center justify-center">
-              <Text className="text-xs font-black text-emerald-800">IA</Text>
+            <View className="w-7 h-7 rounded-full bg-emerald-100 dark:bg-emerald-950/60 items-center justify-center">
+              <Text className="text-xs font-black text-emerald-800 dark:text-emerald-300">IA</Text>
             </View>
-            <Text className="text-base font-black text-gray-950">
+            <Text className="text-base font-black text-gray-950 dark:text-slate-100">
               Registrar Nova Inseminação Artificial
             </Text>
           </View>
-          <Text className="text-xs text-gray-500 mt-1 leading-4">
+          <Text className="text-xs text-gray-500 dark:text-slate-400 mt-1 leading-4">
             Preencha a vaca e o touro. As datas de retorno do cio (21 dias), toque e previsão de parto são calculadas na hora.
           </Text>
         </View>
@@ -310,7 +310,7 @@ export function FormularioInseminacaoRapida({
         <View className="flex-row gap-3">
           {/* Coluna 1: VACA A SER INSEMINADA */}
           <View className="flex-1 gap-1">
-            <Text className="text-xs font-bold uppercase tracking-wide text-gray-700">
+            <Text className="text-xs font-bold uppercase tracking-wide text-gray-700 dark:text-gray-300">
               VACA A SER INSEMINADA *
             </Text>
 
@@ -322,11 +322,11 @@ export function FormularioInseminacaoRapida({
                   : 'Selecionar Vaca'
               }
               onPress={() => setModalVacaAberto(true)}
-              className="h-12 flex-row items-center justify-between rounded-2xl border border-gray-300 bg-white px-3.5 active:bg-gray-50"
+              className="h-12 flex-row items-center justify-between rounded-2xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3.5 active:bg-gray-50 dark:active:bg-slate-800"
             >
               <Text
                 className={`text-sm font-bold flex-1 mr-1 ${
-                  vacaSelecionada ? 'text-gray-900' : 'text-gray-400'
+                  vacaSelecionada ? 'text-gray-900 dark:text-slate-100' : 'text-gray-400 dark:text-slate-500'
                 }`}
                 numberOfLines={1}
               >
@@ -343,7 +343,7 @@ export function FormularioInseminacaoRapida({
           {/* Coluna 2: TOURO UTILIZADO */}
           <View className="flex-1 gap-1">
             <View className="flex-row items-center justify-between">
-              <Text className="text-xs font-bold uppercase tracking-wide text-gray-700" numberOfLines={1}>
+              <Text className="text-xs font-bold uppercase tracking-wide text-gray-700 dark:text-gray-300" numberOfLines={1}>
                 TOURO UTILIZADO *
               </Text>
               <TouchableOpacity
@@ -354,7 +354,7 @@ export function FormularioInseminacaoRapida({
                 }}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               >
-                <Text className="text-[10px] font-bold text-pasto-800">
+                <Text className="text-[10px] font-bold text-pasto-800 dark:text-pasto-300">
                   {modoTouroAvulso ? '← Catálogo' : '+ Avulso'}
                 </Text>
               </TouchableOpacity>
@@ -367,7 +367,7 @@ export function FormularioInseminacaoRapida({
                   placeholderTextColor="#9ca3af"
                   value={nomeTouroAvulso}
                   onChangeText={setNomeTouroAvulso}
-                  className="h-12 rounded-2xl border border-gray-300 bg-white px-3.5 text-sm font-bold text-gray-900"
+                  className="h-12 rounded-2xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3.5 text-sm font-bold text-gray-900 dark:text-slate-100"
                 />
               </View>
             ) : (
@@ -379,11 +379,11 @@ export function FormularioInseminacaoRapida({
                     : 'Selecionar Touro'
                 }
                 onPress={() => setModalTouroAberto(true)}
-                className="h-12 flex-row items-center justify-between rounded-2xl border border-gray-300 bg-white px-3.5 active:bg-gray-50"
+                className="h-12 flex-row items-center justify-between rounded-2xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3.5 active:bg-gray-50 dark:active:bg-slate-800"
               >
                 <Text
                   className={`text-sm font-bold flex-1 mr-1 ${
-                    touroSelecionado ? 'text-gray-900' : 'text-gray-400'
+                    touroSelecionado ? 'text-gray-900 dark:text-slate-100' : 'text-gray-400 dark:text-slate-500'
                   }`}
                   numberOfLines={1}
                 >
@@ -411,17 +411,17 @@ export function FormularioInseminacaoRapida({
 
           {/* Coluna 2: INSEMINADOR / RESPONSÁVEL */}
           <View className="flex-1 gap-1">
-            <Text className="text-xs font-bold uppercase tracking-wide text-gray-700">
+            <Text className="text-xs font-bold uppercase tracking-wide text-gray-700 dark:text-gray-300">
               INSEMINADOR / RESPONSÁVEL
             </Text>
-            <View className="h-12 flex-row items-center rounded-2xl border border-gray-300 bg-white px-3.5">
+            <View className="h-12 flex-row items-center rounded-2xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3.5">
               <TextInput
                 accessibilityLabel="Inseminador responsável"
                 placeholder="Nome do inseminador..."
                 placeholderTextColor="#9ca3af"
                 value={inseminador}
                 onChangeText={setInseminador}
-                className="flex-1 text-base font-bold text-gray-900"
+                className="flex-1 text-base font-bold text-gray-900 dark:text-slate-100"
               />
             </View>
           </View>
@@ -500,7 +500,6 @@ export function FormularioInseminacaoRapida({
             onPress={() => salvarInseminacao(true)}
           />
         </View>
-      </View>
 
       {/* Modal de Seleção de Fêmea */}
       <SeletorItemModal
@@ -559,6 +558,6 @@ export function FormularioInseminacaoRapida({
           carregarOpcoes();
         }}
       />
-    </ScrollView>
+    </View>
   );
 }

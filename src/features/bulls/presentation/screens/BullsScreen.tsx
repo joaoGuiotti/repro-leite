@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { ActivityIndicator, Alert, Text, View } from 'react-native';
+import { Alert, View } from 'react-native';
+import { hapticFeedback } from '@/ui';
 import { ListBullsUseCase } from '../../application/list-bulls.usecase';
 import { RegisterBullUseCase } from '../../application/register-bull.usecase';
 import { AdjustBullStrawsUseCase } from '../../application/adjust-bull-straws.usecase';
@@ -35,9 +36,11 @@ export function BullsScreen({
   const handleCadastrarTouro = async (dados: CreateBullDTO) => {
     const criado = await registerBull(dados);
     if (criado) {
+      await hapticFeedback.success();
       refresh();
       Alert.alert('Sucesso', `Touro "${dados.name}" cadastrado com sucesso!`);
     } else {
+      await hapticFeedback.error();
       Alert.alert('Erro', 'Não foi possível cadastrar o touro. Verifique os dados.');
     }
   };
@@ -47,25 +50,20 @@ export function BullsScreen({
     if (atualizado) {
       refresh();
     } else {
+      await hapticFeedback.error();
       Alert.alert('Atenção', 'Não foi possível ajustar as doses. Verifique se o saldo não ficaria negativo.');
     }
   };
 
-  if (loading) {
-    return (
-      <View className="py-12 items-center justify-center">
-        <ActivityIndicator size="large" color="#1b4332" />
-        <Text className="mt-3 text-sm text-gray-500 font-medium">Carregando catálogo de touros...</Text>
-      </View>
-    );
-  }
-
   return (
-    <CatalogoTouros
-      touros={bulls}
-      onCadastrarTouro={handleCadastrarTouro}
-      onAjustarDoses={handleAjustarDoses}
-      farmId={farmId}
-    />
+    <View className="flex-1">
+      <CatalogoTouros
+        touros={bulls}
+        onCadastrarTouro={handleCadastrarTouro}
+        onAjustarDoses={handleAjustarDoses}
+        farmId={farmId}
+        loading={loading}
+      />
+    </View>
   );
 }

@@ -1,7 +1,6 @@
-import React from 'react';
-import { Text, View } from 'react-native';
 import { Cartao, SeloStatus } from '@/ui';
 import { AlertWithAnimalSummary } from '@features/alerts';
+import { Text, View } from 'react-native';
 
 export interface DailySummaryCardProps {
   alerts: AlertWithAnimalSummary[];
@@ -16,12 +15,12 @@ export function DailySummaryCard({ alerts, loading = false }: DailySummaryCardPr
     <Cartao titulo="Painel Diário">
       <View className="gap-3">
         {/* 1. Cios para vigiar */}
-        <View className="flex-row items-center justify-between rounded-xl bg-pasto-100 p-3.5">
+        <View className="flex-row items-center justify-between rounded-xl bg-pasto-100 dark:bg-pasto-900/40 border border-transparent dark:border-pasto-700/60 p-3.5">
           <View>
-            <Text className="text-xs uppercase font-bold text-pasto-700">
+            <Text className="text-xs uppercase font-bold text-pasto-700 dark:text-pasto-300">
               Cios para Vigiar (21d)
             </Text>
-            <Text className="text-lg font-extrabold text-pasto-900">
+            <Text className="text-lg font-extrabold text-pasto-900 dark:text-pasto-100">
               {loading ? '...' : `${ciosPendentes.length} ${ciosPendentes.length === 1 ? 'vaca' : 'vacas'}`}
             </Text>
           </View>
@@ -33,12 +32,12 @@ export function DailySummaryCard({ alerts, loading = false }: DailySummaryCardPr
         </View>
 
         {/* 2. Toques veterinários */}
-        <View className="flex-row items-center justify-between rounded-xl bg-ambar-100 p-3.5">
+        <View className="flex-row items-center justify-between rounded-xl bg-ambar-100 dark:bg-amber-950/40 border border-transparent dark:border-amber-800/60 p-3.5">
           <View>
-            <Text className="text-xs uppercase font-bold text-ambar-700">
+            <Text className="text-xs uppercase font-bold text-ambar-700 dark:text-amber-300">
               Toques Veterinários (45d)
             </Text>
-            <Text className="text-lg font-extrabold text-amber-900">
+            <Text className="text-lg font-extrabold text-amber-900 dark:text-amber-200">
               {loading ? '...' : `${toquesPendentes.length} ${toquesPendentes.length === 1 ? 'vaca' : 'vacas'}`}
             </Text>
           </View>
@@ -50,12 +49,12 @@ export function DailySummaryCard({ alerts, loading = false }: DailySummaryCardPr
         </View>
 
         {/* 3. Trato do bezerreiro */}
-        <View className="flex-row items-center justify-between rounded-xl bg-white p-3.5 border border-gray-200">
+        <View className="flex-row items-center justify-between rounded-xl bg-white dark:bg-slate-900 p-3.5 border border-gray-200 dark:border-slate-800">
           <View>
-            <Text className="text-xs uppercase font-bold text-gray-500">
+            <Text className="text-xs uppercase font-bold text-gray-500 dark:text-slate-400">
               Trato do Bezerreiro
             </Text>
-            <Text className="text-lg font-extrabold text-pasto-900">
+            <Text className="text-lg font-extrabold text-pasto-900 dark:text-pasto-200">
               0 L Manhã · 0 L Tarde
             </Text>
           </View>

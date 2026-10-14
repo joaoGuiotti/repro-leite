@@ -20,7 +20,7 @@ export interface CampoTextoProps extends Omit<TextInputProps, 'onChange'> {
   classNameContainer?: string;
 }
 
-/** Componente de campo de texto e busca alfanumérico (aceita números e letras). */
+/** Componente de campo de texto e busca alfanumérico com suporte a tema escuro. */
 export function CampoTexto({
   rotulo,
   valor,
@@ -36,13 +36,13 @@ export function CampoTexto({
   return (
     <View className={`gap-1 ${classNameContainer}`}>
       {rotulo && (
-        <Text className="text-sm font-bold text-gray-800">{rotulo}</Text>
+        <Text className="text-sm font-bold text-gray-800 dark:text-gray-200">{rotulo}</Text>
       )}
-      <View className="min-h-14 flex-row items-center rounded-xl border border-gray-300 bg-white px-4">
+      <View className="min-h-14 flex-row items-center rounded-xl border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4">
         {iconeEsquerda && <View className="mr-2.5">{iconeEsquerda}</View>}
         <TextInput
           accessibilityLabel={rotulo || placeholder}
-          className="flex-1 text-base font-semibold text-gray-900"
+          className="flex-1 text-base font-semibold text-gray-900 dark:text-slate-100"
           placeholder={placeholder}
           placeholderTextColor="#94a3b8"
           value={valor}
@@ -55,20 +55,15 @@ export function CampoTexto({
           <TouchableOpacity
             onPress={() => onChange('')}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-            className="p-1 rounded-full bg-gray-100 active:bg-gray-200"
+            className="p-1 rounded-full bg-gray-100 dark:bg-slate-800 active:bg-gray-200 dark:active:bg-slate-700"
             accessibilityLabel="Limpar texto"
           >
-            <X size={14} color="#6b7280" />
+            <X size={16} color="#64748b" />
           </TouchableOpacity>
         )}
-        {sufixo ? (
-          <Text className="ml-2 text-sm font-bold text-terra-700">{sufixo}</Text>
-        ) : null}
-        {iconeDireita && <View className="ml-2">{iconeDireita}</View>}
+        {sufixo ? <Text className="ml-2 text-sm font-bold text-terra-700 dark:text-amber-400">{sufixo}</Text> : null}
+        {iconeDireita && <View className="ml-2.5">{iconeDireita}</View>}
       </View>
     </View>
   );
 }
-
-export const CampoBusca = CampoTexto;
-export default CampoTexto;

@@ -11,7 +11,7 @@ export function FeedingCalculatorCard() {
 
   return (
     <Cartao titulo="Calculadora de Leite por Idade">
-      <Text className="mb-3 text-sm text-gray-600">
+      <Text className="mb-3 text-sm text-gray-600 dark:text-gray-300">
         Digite a idade em dias para ver o volume correto que a bezerra deve receber hoje:
       </Text>
 
@@ -25,12 +25,12 @@ export function FeedingCalculatorCard() {
         />
       </View>
 
-      <View className="rounded-xl border border-pasto-200 bg-pasto-50 p-4">
+      <View className="rounded-xl border border-pasto-200 dark:border-pasto-800/60 bg-pasto-50 dark:bg-pasto-950/40 p-4">
         <View className="flex-row items-center justify-between pb-2">
-          <Text className="text-xs uppercase font-bold text-pasto-700">Fase Atual</Text>
+          <Text className="text-xs uppercase font-bold text-pasto-700 dark:text-pasto-300">Fase Atual</Text>
           <SeloStatus status={plano.statusBadge} texto={plano.phaseName} />
         </View>
-        <Text className="text-lg font-black text-pasto-900">
+        <Text className="text-lg font-black text-pasto-900 dark:text-pasto-100">
           {plano.litersPerDayDescription}
         </Text>
       </View>

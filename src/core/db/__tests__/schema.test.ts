@@ -1,4 +1,4 @@
-import { generateUUID, DEFAULT_FARM_ID, DEFAULT_FARM_NAME } from '@core/db';
+import { generateUUID, DEFAULT_FARM_ID, DEFAULT_FARM_NAME, initDatabase, getExpoDatabase } from '@core/db';
 import * as schema from '@core/db/schema';
 
 describe('Schema & Banco Local Core', () => {
@@ -70,5 +70,11 @@ describe('Schema & Banco Local Core', () => {
     expect(schema.bulls.breed).toBeDefined();
     expect(schema.bulls.code).toBeDefined();
     expect(schema.bulls.strawsInStock).toBeDefined();
+  });
+
+  test('initDatabase deve executar criação de tabelas, migração de colunas e índices sem erros', async () => {
+    await expect(initDatabase()).resolves.not.toThrow();
+    const rawDb = getExpoDatabase();
+    expect(rawDb.execSync).toHaveBeenCalled();
   });
 });

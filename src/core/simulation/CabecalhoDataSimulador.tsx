@@ -7,7 +7,7 @@ export function CabecalhoDataSimulador() {
   const { activeDateString, isSimulated, advanceDays, resetToToday } = useManagementDate();
 
   return (
-    <View className="flex-row flex-wrap items-center justify-between gap-2 border-b border-pasto-200 bg-pasto-700 px-4 py-2">
+    <View className="flex-row flex-wrap items-center justify-between gap-2 border-b border-pasto-200 dark:border-slate-800 bg-pasto-700 dark:bg-slate-900 px-4 py-2">
       {/* Indicador da Data Ativa */}
       <View className="flex-row items-center gap-2">
         <Calendar size={16} color="#fff" />
@@ -31,27 +31,27 @@ export function CabecalhoDataSimulador() {
           accessibilityRole="button"
           accessibilityLabel="Avançar um dia"
           onPress={() => advanceDays(1)}
-          className="rounded-lg bg-white px-2.5 py-1.5 shadow-sm active:bg-pasto-100"
+          className="rounded-lg bg-white dark:bg-slate-800 px-2.5 py-1.5 shadow-sm active:bg-pasto-100 dark:active:bg-slate-700"
         >
-          <Text className="text-xs font-bold text-pasto-900">+1d</Text>
+          <Text className="text-xs font-bold text-pasto-900 dark:text-slate-100">+1d</Text>
         </Pressable>
 
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Avançar uma semana"
           onPress={() => advanceDays(7)}
-          className="rounded-lg bg-white px-2.5 py-1.5 shadow-sm active:bg-pasto-100"
+          className="rounded-lg bg-white dark:bg-slate-800 px-2.5 py-1.5 shadow-sm active:bg-pasto-100 dark:active:bg-slate-700"
         >
-          <Text className="text-xs font-bold text-pasto-900">+7d</Text>
+          <Text className="text-xs font-bold text-pasto-900 dark:text-slate-100">+7d</Text>
         </Pressable>
 
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Avançar vinte e um dias ciclo de cio"
           onPress={() => advanceDays(21)}
-          className="rounded-lg bg-pasto-200 px-2.5 py-1.5 shadow-sm active:bg-pasto-500"
+          className="rounded-lg bg-pasto-200 dark:bg-pasto-800 px-2.5 py-1.5 shadow-sm active:bg-pasto-500 dark:active:bg-pasto-700"
         >
-          <Text className="text-xs font-bold text-pasto-900">+21d (Cio)</Text>
+          <Text className="text-xs font-bold text-pasto-900 dark:text-pasto-100">+21d (Cio)</Text>
         </Pressable>
 
         {isSimulated && (
@@ -59,9 +59,9 @@ export function CabecalhoDataSimulador() {
             accessibilityRole="button"
             accessibilityLabel="Resetar para data real de hoje"
             onPress={resetToToday}
-            className="rounded-lg bg-alerta-100 px-2.5 py-1.5 active:bg-alerta-700"
+            className="rounded-lg bg-alerta-100 dark:bg-red-950/60 px-2.5 py-1.5 active:bg-alerta-700 dark:active:bg-red-900"
           >
-            <Text className="text-xs font-bold text-alerta-700">Hoje</Text>
+            <Text className="text-xs font-bold text-alerta-700 dark:text-red-300">Hoje</Text>
           </Pressable>
         )}
       </View>

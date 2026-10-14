@@ -28,17 +28,17 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ManagementDateProvider>
         <SyncStatusProvider>
-          <SafeAreaView edges={['top']} className="flex-1 bg-white">
-            <StatusBar style="dark" />
+          <SafeAreaView edges={['top']} className="flex-1 bg-white dark:bg-slate-950">
+            <StatusBar style="auto" />
             <CabecalhoStatusSimulador />
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="index" options={{ headerShown: false }} />
             </Stack>
             {!isDbReady && (
-              <View className="absolute inset-0 z-50 items-center justify-center bg-pasto-50 p-6">
+              <View className="absolute inset-0 z-50 items-center justify-center bg-pasto-50 dark:bg-slate-900 p-6">
                 <ActivityIndicator size="large" color="#1b4332" />
-                <Text className="mt-4 text-base font-semibold text-pasto-900">
+                <Text className="mt-4 text-base font-semibold text-pasto-900 dark:text-pasto-300">
                   Carregando ReproLeite...
                 </Text>
               </View>

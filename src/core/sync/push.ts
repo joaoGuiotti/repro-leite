@@ -1,7 +1,7 @@
 import { OutboxRepository } from './outbox.repository';
 import { RemoteSyncGateway, RemoteOutboxItem } from '../network/api-client';
-import { getDatabase } from '@/db/client';
-import * as schema from '@/db/schema';
+import { getDatabase } from '@core/db/client';
+import * as schema from '@core/db/schema';
 import { eq } from 'drizzle-orm';
 
 export interface PushResult {

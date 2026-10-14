@@ -45,6 +45,10 @@ module.exports = defineConfig([
           type: 'ui',
           pattern: 'src/ui',
         },
+        {
+          type: 'i18n',
+          pattern: 'src/i18n',
+        },
       ],
     },
     rules: {
@@ -100,6 +104,7 @@ module.exports = defineConfig([
                 { to: { element: { type: 'application', captured: { feature: '{{from.captured.feature}}' } } } },
                 { to: { element: { type: 'ui' } } },
                 { to: { element: { type: 'core' } } },
+                { to: { element: { type: 'i18n' } } },
               ],
               disallow: [{ to: { element: { type: 'infra' } } }],
             },
@@ -116,7 +121,11 @@ module.exports = defineConfig([
             },
             {
               from: { element: { type: 'ui' } },
-              allow: [{ to: { element: { type: 'ui' } } }, { to: { element: { type: 'core' } } }],
+              allow: [
+                { to: { element: { type: 'ui' } } },
+                { to: { element: { type: 'core' } } },
+                { to: { element: { type: 'i18n' } } },
+              ],
               disallow: [
                 { to: { element: { type: 'domain' } } },
                 { to: { element: { type: 'application' } } },

@@ -1,6 +1,6 @@
 import { AnimalRecord } from '@features/herd';
 import React, { useState } from 'react';
-import { View } from 'react-native';
+import { ScrollView } from 'react-native';
 import { FormularioInseminacaoRapida } from '../components/FormularioInseminacaoRapida';
 import { HistoricoInseminacoesRecentes } from '../components/HistoricoInseminacoesRecentes';
 
@@ -23,7 +23,12 @@ export function InseminationScreen({
   };
 
   return (
-    <View className="gap-4">
+    <ScrollView
+      className="flex-1"
+      contentContainerClassName="p-4 gap-4 pb-20"
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
       <FormularioInseminacaoRapida
         farmId={farmId}
         vacaPreSelecionada={vacaPreSelecionada}
@@ -37,6 +42,6 @@ export function InseminationScreen({
           setRefreshHistorico((prev) => prev + 1);
         }}
       />
-    </View>
+    </ScrollView>
   );
 }

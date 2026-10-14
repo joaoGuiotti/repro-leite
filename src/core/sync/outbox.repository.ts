@@ -1,6 +1,6 @@
 import { eq, count, inArray, asc, and, or, isNull, lte } from 'drizzle-orm';
-import { getDatabase, generateUUID } from '@/db/client';
-import * as schema from '@/db/schema';
+import { getDatabase, generateUUID } from '@core/db/client';
+import * as schema from '@core/db/schema';
 
 export type OutboxStatus = 'pending' | 'in_flight' | 'failed' | 'completed';
 

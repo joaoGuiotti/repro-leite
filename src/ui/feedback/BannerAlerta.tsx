@@ -1,6 +1,7 @@
 import { AlertCircle, AlertTriangle, CheckCircle2, Info, X } from 'lucide-react-native';
-import React, { ReactNode } from 'react';
-import { Pressable, Text, TouchableOpacity, View } from 'react-native';
+import { ReactNode } from 'react';
+import { Pressable, Text, View } from 'react-native';
+import { Botao } from '../primitives/Botao';
 
 export type BannerAlertaVariante = 'alerta' | 'atencao' | 'sucesso' | 'info';
 
@@ -17,36 +18,32 @@ export interface BannerAlertaProps {
 
 const ESTILOS_VARIANTE = {
   atencao: {
-    container: 'bg-ambar-50 border-ambar-300',
-    titulo: 'text-ambar-900',
-    mensagem: 'text-ambar-800',
+    container: 'bg-ambar-50 dark:bg-amber-950/40 border-ambar-300 dark:border-amber-800',
+    titulo: 'text-ambar-900 dark:text-amber-200',
+    mensagem: 'text-ambar-800 dark:text-amber-300',
     iconePadrao: <AlertTriangle size={22} color="#b45309" />,
-    botaoAcao: 'bg-ambar-600 active:bg-ambar-700',
-    textoBotao: 'text-white',
+    botaoVariante: 'aviso' as const,
   },
   alerta: {
-    container: 'bg-alerta-50 border-alerta-300',
-    titulo: 'text-alerta-900',
-    mensagem: 'text-alerta-800',
+    container: 'bg-alerta-50 dark:bg-red-950/40 border-alerta-300 dark:border-red-800',
+    titulo: 'text-alerta-900 dark:text-red-200',
+    mensagem: 'text-alerta-800 dark:text-red-300',
     iconePadrao: <AlertCircle size={22} color="#b91c1c" />,
-    botaoAcao: 'bg-alerta-600 active:bg-alerta-700',
-    textoBotao: 'text-white',
+    botaoVariante: 'perigo' as const,
   },
   sucesso: {
-    container: 'bg-pasto-50 border-pasto-300',
-    titulo: 'text-pasto-900',
-    mensagem: 'text-pasto-800',
+    container: 'bg-pasto-50 dark:bg-pasto-950/40 border-pasto-300 dark:border-pasto-800',
+    titulo: 'text-pasto-900 dark:text-pasto-200',
+    mensagem: 'text-pasto-800 dark:text-pasto-300',
     iconePadrao: <CheckCircle2 size={22} color="#1b4332" />,
-    botaoAcao: 'bg-pasto-800 active:bg-pasto-900',
-    textoBotao: 'text-white',
+    botaoVariante: 'sucesso' as const,
   },
   info: {
-    container: 'bg-blue-50 border-blue-300',
-    titulo: 'text-blue-900',
-    mensagem: 'text-blue-800',
+    container: 'bg-blue-50 dark:bg-blue-950/40 border-blue-300 dark:border-blue-800',
+    titulo: 'text-blue-900 dark:text-blue-200',
+    mensagem: 'text-blue-800 dark:text-blue-300',
     iconePadrao: <Info size={22} color="#1d4ed8" />,
-    botaoAcao: 'bg-blue-600 active:bg-blue-700',
-    textoBotao: 'text-white',
+    botaoVariante: 'secundario' as const,
   },
 } as const;
 
@@ -64,7 +61,7 @@ export function BannerAlerta({
 
   return (
     <View
-      className={`rounded-xl border p-4 shadow-sm ${estilo.container} ${className}`}
+      className={`rounded-2xl border p-4 shadow-sm ${estilo.container} ${className}`}
     >
       <View className="flex-row items-start justify-between">
         <View className="flex-row items-start gap-3 flex-1 pr-2">
@@ -80,31 +77,29 @@ export function BannerAlerta({
         </View>
 
         {onFechar && (
-          <TouchableOpacity
+          <Pressable
             accessibilityRole="button"
             accessibilityLabel="Fechar alerta"
             onPress={onFechar}
-            className="p-1 rounded-md active:bg-black/5"
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            className="p-1 rounded-full active:bg-black/5 dark:active:bg-white/10"
           >
             <X size={18} color="#6b7280" />
-          </TouchableOpacity>
+          </Pressable>
         )}
       </View>
 
       {textoAcao && onAcao && (
         <View className="mt-3 flex-row justify-end">
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={textoAcao}
+          <Botao
+            titulo={textoAcao}
             onPress={onAcao}
-            className={`min-h-12 px-5 py-2.5 rounded-lg flex-row items-center justify-center ${estilo.botaoAcao}`}
-          >
-            <Text className={`text-sm font-bold ${estilo.textoBotao}`}>
-              {textoAcao}
-            </Text>
-          </Pressable>
+            variante={estilo.botaoVariante}
+            tamanho="sm"
+          />
         </View>
       )}
     </View>
   );
 }
+
