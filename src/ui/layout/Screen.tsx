@@ -17,7 +17,7 @@ export interface ScreenProps {
   header?: ReactNode;
   /** Footer fixo fora do scroll */
   footer?: ReactNode;
-  /** Borda segura do SafeArea (padrão: top, left, right) */
+  /** Borda segura do SafeArea (padrão: left, right; 'top' já é aplicado no RootLayout acima do CabecalhoStatusSimulador) */
   edges?: Edge[];
   /** Se ativa KeyboardAvoidingView (padrão: true no iOS) */
   keyboardAvoiding?: boolean;
@@ -40,7 +40,7 @@ export function Screen({
   scroll = false,
   header,
   footer,
-  edges = ['top', 'left', 'right'],
+  edges = ['left', 'right'],
   keyboardAvoiding = Platform.OS === 'ios',
   className = '',
   contentContainerClassName = 'p-4 pb-12 gap-4',

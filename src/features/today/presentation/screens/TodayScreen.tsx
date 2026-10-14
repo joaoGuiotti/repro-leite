@@ -1,31 +1,62 @@
+import React, { useMemo, useState } from 'react';
+import { Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { i18n } from '@/i18n';
-import { Cartao, Screen, SeloStatus } from '@/ui';
+import { Cartao, ErrorState, ListLoadingState, Screen, SeloStatus } from '@/ui';
 import { DEFAULT_FARM_ID } from '@core/db';
 import { formatToDisplay, useManagementDate } from '@core/simulation';
-import {
-  AlertsList,
-  getAlertsUseCases,
-  useAlerts,
-  useCompleteAlert,
-} from '@features/alerts';
-import { Text, View } from 'react-native';
+import { AlertWithReproDetails } from '../../domain/today.types';
+import { getTodayUseCases } from '../../factory';
+import { CalfFeedingCard } from '../components/CalfFeedingCard';
 import { DailySummaryCard } from '../components/DailySummaryCard';
+import { HeatCheckListCard } from '../components/HeatCheckListCard';
+import { PregnancyCheckListCard } from '../components/PregnancyCheckListCard';
 import { QuickActionsCard } from '../components/QuickActionsCard';
+import { RepeatHeatModal } from '../components/RepeatHeatModal';
+import { useTodayActions } from '../hooks/useTodayActions';
+import { useTodayDashboard } from '../hooks/useTodayDashboard';
 
 export interface TodayScreenProps {
   farmId?: string;
 }
 
 export function TodayScreen({ farmId = DEFAULT_FARM_ID }: TodayScreenProps) {
+  const router = useRouter();
   const { activeDateString, isSimulated } = useManagementDate();
+  const [selectedRepeatAlert, setSelectedRepeatAlert] =
+    useState<AlertWithReproDetails | null>(null);
 
-  const alertsUseCases = getAlertsUseCases();
-  const { alerts, loading, refresh } = useAlerts(
+  const todayUseCases = useMemo(() => getTodayUseCases(), []);
+
+  const { data, loading, error, refresh } = useTodayDashboard(
     farmId,
-    alertsUseCases.listPendingUseCase,
-    activeDateString
+    activeDateString,
+    todayUseCases.getDashboardUseCase
   );
-  const { completeAlert } = useCompleteAlert(alertsUseCases.completeUseCase);
+
+  const { actionLoadingId, handleHeatChoice, handlePregnancyDiagnosis } =
+    useTodayActions({
+      farmId,
+      referenceDate: activeDateString,
+      confirmHeatUseCase: todayUseCases.confirmHeatUseCase,
+      recordPregnancyUseCase: todayUseCases.recordPregnancyUseCase,
+      onSuccess: refresh,
+      onRebreedSelected: (animalId) => {
+        setSelectedRepeatAlert(null);
+        router.push(
+          `/(tabs)/reproducao?action=inseminate&animalId=${animalId}` as any
+        );
+      },
+    });
+
+  const emptyFeedingSummary = {
+    totalMorningLiters: 0,
+    totalAfternoonLiters: 0,
+    totalDailyLiters: 0,
+    activeCalvesCount: 0,
+    weaningCount: 0,
+    transitioningCalves: [],
+  };
 
   return (
     <Screen scroll contentContainerClassName="gap-4 p-4 pb-16">
@@ -54,16 +85,61 @@ export function TodayScreen({ farmId = DEFAULT_FARM_ID }: TodayScreenProps) {
       <QuickActionsCard />
 
       {/* 3. Painel Diário com Contadores Vivos */}
-      <DailySummaryCard alerts={alerts} loading={loading} />
+      <DailySummaryCard counts={data?.counts} loading={loading} />
 
-      {/* 4. Lista de Alertas Ativos e Manejos do Dia */}
-      <AlertsList
-        alerts={alerts}
-        loading={loading}
-        onCompleteAlert={completeAlert}
-        onAlertCompleted={refresh}
-        title="Manejos para Realizar Hoje"
-        emptyMessage="Nenhum manejo pendente para hoje."
+      {error && !data ? (
+        <View className="py-4">
+          <ErrorState message={error} onRetry={refresh} />
+        </View>
+      ) : loading && !data ? (
+        <View className="py-4">
+          <ListLoadingState count={3} />
+        </View>
+      ) : (
+        <>
+          {/* 4. Quadro de Cios para Vigiar (Janela de 21 dias) */}
+          <HeatCheckListCard
+            alerts={data?.heatAlerts ?? []}
+            loading={loading}
+            actionLoadingId={actionLoadingId}
+            onHeld={(alert) => handleHeatChoice(alert, 'held')}
+            onRepeated={(alert) => setSelectedRepeatAlert(alert)}
+          />
+
+          {/* 5. Quadro de Toques Veterinários (45 a 60 dias) */}
+          <PregnancyCheckListCard
+            alerts={data?.pregnancyAlerts ?? []}
+            loading={loading}
+            actionLoadingId={actionLoadingId}
+            onConfirmPregnant={(alert) =>
+              handlePregnancyDiagnosis(alert, 'pregnant')
+            }
+            onConfirmEmpty={(alert) =>
+              handlePregnancyDiagnosis(alert, 'empty')
+            }
+          />
+
+          {/* 6. Quadro do Bezerreiro (Trato de Hoje) */}
+          <CalfFeedingCard
+            summary={data?.feedingSummary ?? emptyFeedingSummary}
+            loading={loading}
+          />
+        </>
+      )}
+
+      {/* Modal de Decisão Rápida para Repetição de Cio */}
+      <RepeatHeatModal
+        visible={!!selectedRepeatAlert}
+        alert={selectedRepeatAlert}
+        loading={!!actionLoadingId}
+        onClose={() => setSelectedRepeatAlert(null)}
+        onRebreedNow={async (alert) => {
+          await handleHeatChoice(alert, 'repeated_rebreed');
+        }}
+        onMarkEmptyOnly={async (alert) => {
+          await handleHeatChoice(alert, 'repeated_empty_only');
+          setSelectedRepeatAlert(null);
+        }}
       />
     </Screen>
   );

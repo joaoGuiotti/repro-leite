@@ -1,10 +1,9 @@
-import React from 'react';
-import { Text, View } from 'react-native';
-import { Cloud, FileSpreadsheet, RotateCcw, Share2, Sliders } from 'lucide-react-native';
+import { i18n } from '@/i18n';
+import { Botao, Cartao, Icon, Screen, SeloStatus, hapticFeedback } from '@/ui';
 import { DEFAULT_FARM_ID } from '@core/db';
 import { useSyncStatus } from '@core/sync';
-import { Botao, Cartao, Icon, SeloStatus, Screen, hapticFeedback } from '@/ui';
-import { i18n } from '@/i18n';
+import { Cloud, FileSpreadsheet, RotateCcw, Share2, Sliders } from 'lucide-react-native';
+import { Text, View } from 'react-native';
 import { getSettingsUseCases } from '../../factory';
 import { useSettings } from '../hooks/useSettings';
 
@@ -46,7 +45,7 @@ export function SettingsScreen({ farmId = DEFAULT_FARM_ID }: SettingsScreenProps
           <Botao
             titulo="Exportar Backup para WhatsApp (JSON)"
             icone={<Icon icon={Share2} size="md" className="text-white" decorative />}
-            onPress={() => {}}
+            onPress={() => { }}
             variante="primario"
             principal
           />
@@ -55,7 +54,7 @@ export function SettingsScreen({ farmId = DEFAULT_FARM_ID }: SettingsScreenProps
               <Botao
                 titulo="CSV Rebanho"
                 icone={<Icon icon={FileSpreadsheet} size="sm" className="text-pasto-900 dark:text-pasto-200" decorative />}
-                onPress={() => {}}
+                onPress={() => { }}
                 variante="secundario"
               />
             </View>
@@ -63,7 +62,7 @@ export function SettingsScreen({ farmId = DEFAULT_FARM_ID }: SettingsScreenProps
               <Botao
                 titulo="CSV Bezerras"
                 icone={<Icon icon={FileSpreadsheet} size="sm" className="text-pasto-900 dark:text-pasto-200" decorative />}
-                onPress={() => {}}
+                onPress={() => { }}
                 variante="secundario"
               />
             </View>
@@ -71,7 +70,7 @@ export function SettingsScreen({ farmId = DEFAULT_FARM_ID }: SettingsScreenProps
           <Botao
             titulo="Restaurar Dados de Arquivo JSON"
             icone={<Icon icon={RotateCcw} size="sm" className="text-amber-800 dark:text-amber-300" decorative />}
-            onPress={() => {}}
+            onPress={() => { }}
             variante="aviso"
           />
         </View>
@@ -106,7 +105,7 @@ export function SettingsScreen({ farmId = DEFAULT_FARM_ID }: SettingsScreenProps
           />
           <Botao
             titulo="Entrar com Conta (E-mail OTP)"
-            onPress={() => {}}
+            onPress={() => { }}
             variante="secundario"
           />
         </View>
@@ -136,7 +135,7 @@ export function SettingsScreen({ farmId = DEFAULT_FARM_ID }: SettingsScreenProps
         <Botao
           titulo="Editar Metas e Prazos"
           icone={<Icon icon={Sliders} size="sm" className="text-pasto-900 dark:text-pasto-200" decorative />}
-          onPress={() => {}}
+          onPress={() => { }}
           variante="secundario"
         />
       </Cartao>

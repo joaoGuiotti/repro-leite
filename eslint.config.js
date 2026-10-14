@@ -88,11 +88,11 @@ module.exports = defineConfig([
               from: { element: { type: 'infra' } },
               allow: [
                 { to: { element: { type: 'domain', captured: { feature: '{{from.captured.feature}}' } } } },
+                { to: { element: { type: 'application', captured: { feature: '{{from.captured.feature}}' } } } },
                 { to: { element: { type: 'core' } } },
               ],
               disallow: [
                 { to: { element: { type: 'presentation' } } },
-                { to: { element: { type: 'application' } } },
                 { to: { element: { type: 'ui' } } },
                 { to: { element: { type: 'app' } } },
               ],
