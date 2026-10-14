@@ -1,4 +1,4 @@
-import { AnimalRecord } from '@/types/animal';
+import { AnimalRecord } from '../../domain/animal.entity';
 import { Botao, Cartao, ModalPadrao, SelectDate } from '@/ui';
 import { AlertTriangle } from 'lucide-react-native';
 import { useState } from 'react';

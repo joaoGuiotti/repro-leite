@@ -1,5 +1,5 @@
-import { evaluateEarTagAvailability } from '@/domain/earTag';
-import { AnimalReproStatus, AnimalSex, AnimalSummary } from '@/types/animal';
+import { evaluateEarTagAvailability } from '../../domain/ear-tag';
+import { AnimalReproStatus, AnimalSex, AnimalSummary } from '../../domain/animal.entity';
 import { Botao, CampoNumerico, ModalPadrao, SelectDate } from '@/ui';
 import { AlertCircle, AlertTriangle, CheckCircle } from 'lucide-react-native';
 import { useMemo, useState } from 'react';

@@ -5,6 +5,8 @@ import { AnimalRecord, CreateAnimalDTO, RegisterExitDTO } from '@/types/animal';
 import { normalizeEarTag } from '@/domain/earTag';
 import { SyncQueueRepository } from '@core/sync';
 
+
+
 export class AnimalRepository {
   /**
    * Lista todos os animais não deletados de uma fazenda, ordenando ativos primeiro.
