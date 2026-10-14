@@ -1,6 +1,5 @@
-import React from 'react';
-import { View, Text, Pressable, Switch } from 'react-native';
-import { ShieldCheck, CloudOff, RefreshCw, AlertCircle } from 'lucide-react-native';
+import { AlertCircle, CloudOff, RefreshCw, ShieldCheck } from 'lucide-react-native';
+import { Pressable, Switch, Text, View } from 'react-native';
 import { useSyncStatus } from '../context/SyncStatusContext';
 import { CabecalhoDataSimulador } from './CabecalhoDataSimulador';
 
@@ -77,20 +76,18 @@ export function CabecalhoStatusSimulador({ compact = false }: CabecalhoStatusSim
             accessibilityLabel="Sincronizar agora"
             disabled={isSimulatedOffline || state === 'syncing'}
             onPress={triggerSyncNow}
-            className={`flex-row items-center gap-1.5 rounded-lg px-2.5 py-1 ${
-              isSimulatedOffline || state === 'syncing'
-                ? 'bg-gray-100 opacity-50'
-                : 'bg-pasto-900 active:bg-pasto-700'
-            }`}
+            className={`flex-row items-center gap-1.5 rounded-lg px-2.5 py-1 ${isSimulatedOffline || state === 'syncing'
+              ? 'bg-gray-100 opacity-50'
+              : 'bg-pasto-900 active:bg-pasto-700'
+              }`}
           >
             <RefreshCw
               size={12}
               color={isSimulatedOffline || state === 'syncing' ? '#94a3b8' : '#ffffff'}
             />
             <Text
-              className={`text-xs font-bold ${
-                isSimulatedOffline || state === 'syncing' ? 'text-gray-400' : 'text-white'
-              }`}
+              className={`text-xs font-bold ${isSimulatedOffline || state === 'syncing' ? 'text-gray-400' : 'text-white'
+                }`}
             >
               {state === 'syncing' ? 'Enviando...' : 'Sincronizar'}
             </Text>
