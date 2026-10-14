@@ -3,7 +3,7 @@ import { getDatabase, generateUUID } from '../client';
 import * as schema from '../schema';
 import { AnimalRecord, CreateAnimalDTO, RegisterExitDTO } from '@/types/animal';
 import { normalizeEarTag } from '@/domain/earTag';
-import { SyncQueueRepository } from './syncQueueRepository';
+import { SyncQueueRepository } from '@core/sync';
 
 export class AnimalRepository {
   /**

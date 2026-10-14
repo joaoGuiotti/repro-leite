@@ -5,7 +5,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { ManagementDateProvider } from '@core/simulation';
-import { SyncStatusProvider } from '../context/SyncStatusContext';
+import { SyncStatusProvider } from '@core/sync';
 import { CabecalhoStatusSimulador } from '../ui/CabecalhoStatusSimulador';
 import { initDatabase } from '../db/client';
 

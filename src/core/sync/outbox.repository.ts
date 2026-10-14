@@ -1,8 +1,8 @@
 import { eq, count, inArray, asc } from 'drizzle-orm';
-import { getDatabase, generateUUID } from '../client';
-import * as schema from '../schema';
+import { getDatabase, generateUUID } from '@/db/client';
+import * as schema from '@/db/schema';
 
-export class SyncQueueRepository {
+export class OutboxRepository {
   /**
    * Retorna a quantidade de alterações locais pendentes de sincronização.
    */
@@ -81,3 +81,6 @@ export class SyncQueueRepository {
     }
   }
 }
+
+export { OutboxRepository as SyncQueueRepository };
+

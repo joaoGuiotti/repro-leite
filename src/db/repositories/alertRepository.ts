@@ -2,7 +2,7 @@ import { and, eq, isNull, lte } from 'drizzle-orm';
 import { generateUUID, getDatabase } from '../client';
 import * as schema from '../schema';
 import { AlertRecord, CreateAlertDTO } from '@/types/alert';
-import { SyncQueueRepository } from './syncQueueRepository';
+import { SyncQueueRepository } from '@core/sync';
 
 export class AlertRepository {
   /**

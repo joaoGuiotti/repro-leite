@@ -1,6 +1,6 @@
 import { AlertCircle, CloudOff, RefreshCw, ShieldCheck } from 'lucide-react-native';
 import { Pressable, Switch, Text, View } from 'react-native';
-import { useSyncStatus } from '../context/SyncStatusContext';
+import { useSyncStatus } from '@core/sync';
 import { CabecalhoDataSimulador } from './CabecalhoDataSimulador';
 
 export interface CabecalhoStatusSimuladorProps {

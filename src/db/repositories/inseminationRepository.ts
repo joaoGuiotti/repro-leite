@@ -10,7 +10,7 @@ import {
   InseminationRecord,
 } from '@/types/insemination';
 import { AlertRepository } from './alertRepository';
-import { SyncQueueRepository } from './syncQueueRepository';
+import { SyncQueueRepository } from '@core/sync';
 
 export interface InseminationWithAnimalSummary extends InseminationRecord {
   animalEarTag: string;

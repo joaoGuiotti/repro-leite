@@ -2,7 +2,7 @@ import React from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { Share2, FileSpreadsheet, RotateCcw, Cloud, Sliders } from 'lucide-react-native';
 import { Cartao, Botao, SeloStatus } from '@/ui';
-import { useSyncStatus } from '@/context/SyncStatusContext';
+import { useSyncStatus } from '@core/sync';
 
 export default function TelaAjustes() {
   const { state, pendingCount, lastSyncedDescription, triggerSyncNow, isSimulatedOffline } = useSyncStatus();

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { SyncProtectionState, resolveProtectionStatus, getSyncStateDescription } from '../domain/syncState';
-import { SyncQueueRepository } from '../db/repositories/syncQueueRepository';
-import { DEFAULT_FARM_ID } from '../db/client';
+import { SyncProtectionState, resolveProtectionStatus, getSyncStateDescription } from './sync-state';
+import { OutboxRepository as SyncQueueRepository } from './outbox.repository';
+import { DEFAULT_FARM_ID } from '@/db/client';
 
 export interface SyncStatusContextType {
   state: SyncProtectionState;
