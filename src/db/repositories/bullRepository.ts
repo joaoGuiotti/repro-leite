@@ -3,7 +3,7 @@ import { getDatabase, generateUUID } from '../client';
 import * as schema from '../schema';
 import { BullRecord, CreateBullDTO, UpdateBullDTO } from '@/types/bull';
 import { adjustBullStock } from '@/domain/bullStock';
-import { SyncQueueRepository } from './syncQueueRepository';
+import { SyncQueueRepository } from '@core/sync';
 
 export class BullRepository {
   /**

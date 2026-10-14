@@ -4,7 +4,7 @@ import {
   parseDateString,
   isSimulatedDate,
   getRealTodayDateString,
-} from '../../src/domain/dateSimulation';
+} from '@core/simulation/date-simulation';
 
 describe('Domain: dateSimulation (Motor Puro de Cálculo de Datas)', () => {
   test('formatToDateString deve formatar data como YYYY-MM-DD', () => {

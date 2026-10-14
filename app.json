@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "my-app",
-    "slug": "my-app",
+    "name": "repro-leite",
+    "slug": "repro-leite",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "reproleite",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon"

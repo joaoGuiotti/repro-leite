@@ -39,3 +39,36 @@ Docs: https://docs.expo.dev/eas/index.md
 - If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.
 - Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
 - Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
+
+## Clean Architecture & Regra de Dependências
+
+O projeto adota Clean Architecture + Feature-First (Offline-First).
+
+```
+presentation  →  application  →  domain  ←  infra
+                                   ▲
+                       (infra implementa os ports)
+```
+
+| Camada | Pode importar | NÃO pode importar |
+|---|---|---|
+| `domain` | apenas `domain` da mesma feature e `core/result`, `core/utils` | React, Drizzle, expo-*, outras camadas |
+| `application` | `domain` (ports), `core/result` | `infra`, `presentation`, SQLite |
+| `infra` | `domain`, `core/db`, `core/sync` | `presentation`, `application` |
+| `presentation` | `application`, `domain` (tipos), `ui`, `core` | `infra` diretamente |
+| `features/A` → `features/B` | **apenas** `features/B/index.ts` | caminhos internos de B |
+| `core` | outros módulos `core`, `utils` | `features`, `ui` |
+| `ui` | `ui`, `core/utils` | `features`, `core/db`, `core/sync` |
+
+## Convenções de Código
+
+- **Idioma:** Código em inglês (`Herd`, `Bull`, `Insemination`, `Animal`), interface do usuário em pt-BR.
+- **Nomenclatura:** Arquivos em `kebab-case` (`register-animal.usecase.ts`), componentes React em `PascalCase.tsx`.
+- **Sufixos:** `.entity.ts`, `.repository.ts` (port), `.sqlite.repository.ts` (implementação), `.usecase.ts`, `.mapper.ts`, `.schema.ts`.
+- **Offline-First:** O SQLite local é a única fonte da verdade para a UI. Toda escrita sincronizável deve envolver registro + outbox na mesma transação.
+- **Aliases:**
+  - `@/*` → `src/*`
+  - `@features/*` → `src/features/*`
+  - `@core/*` → `src/core/*`
+  - `@ui/*` → `src/ui/*` e `@ui` → `src/ui`
+

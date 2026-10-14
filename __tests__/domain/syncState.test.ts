@@ -1,4 +1,4 @@
-import { resolveProtectionStatus, getSyncStateDescription } from '../../src/domain/syncState';
+import { resolveProtectionStatus, getSyncStateDescription } from '@core/sync';
 
 describe('Domain: syncState (Consolidação de Status de Proteção)', () => {
   test('resolveProtectionStatus deve priorizar syncing quando ativo', () => {

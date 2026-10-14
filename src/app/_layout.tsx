@@ -1,13 +1,12 @@
-import '../global.css';
-import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator, Text } from 'react-native';
+import { initDatabase } from '@core/db';
+import { CabecalhoStatusSimulador, ManagementDateProvider } from '@core/simulation';
+import { SyncStatusProvider } from '@core/sync';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Text, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { ManagementDateProvider } from '../context/ManagementDateContext';
-import { SyncStatusProvider } from '../context/SyncStatusContext';
-import { CabecalhoStatusSimulador } from '../ui/CabecalhoStatusSimulador';
-import { initDatabase } from '../db/client';
+import '../global.css';
 
 export default function RootLayout() {
   const [isDbReady, setIsDbReady] = useState(false);
@@ -29,17 +28,17 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ManagementDateProvider>
         <SyncStatusProvider>
-          <SafeAreaView edges={['top']} className="flex-1 bg-white">
-            <StatusBar style="dark" />
+          <SafeAreaView edges={['top']} className="flex-1 bg-white dark:bg-slate-950">
+            <StatusBar style="auto" />
             <CabecalhoStatusSimulador />
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="index" options={{ headerShown: false }} />
             </Stack>
             {!isDbReady && (
-              <View className="absolute inset-0 z-50 items-center justify-center bg-pasto-50 p-6">
+              <View className="absolute inset-0 z-50 items-center justify-center bg-pasto-50 dark:bg-slate-900 p-6">
                 <ActivityIndicator size="large" color="#1b4332" />
-                <Text className="mt-4 text-base font-semibold text-pasto-900">
+                <Text className="mt-4 text-base font-semibold text-pasto-900 dark:text-pasto-300">
                   Carregando ReproLeite...
                 </Text>
               </View>

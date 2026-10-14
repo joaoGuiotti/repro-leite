@@ -2,17 +2,57 @@
 module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   presets: [require("nativewind/preset")],
+  darkMode: 'class',
   theme: {
     extend: {
-      // Tema único do app: nenhuma tela usa cor solta.
+      // Tema semântico do app: nenhuma tela usa cor solta.
       colors: {
+        surface: {
+          DEFAULT: '#ffffff',
+          dark: '#0f172a',
+          variant: '#f8fafc',
+          'variant-dark': '#1e293b',
+          border: '#e2e8f0',
+          'border-dark': '#334155',
+        },
+        'on-surface': {
+          DEFAULT: '#0f172a',
+          dark: '#f8fafc',
+          muted: '#64748b',
+          'muted-dark': '#94a3b8',
+        },
+        danger: {
+          DEFAULT: '#dc2626',
+          light: '#fee2e2',
+          dark: '#ef4444',
+        },
+        warning: {
+          DEFAULT: '#d97706',
+          light: '#fef3c7',
+          dark: '#f59e0b',
+        },
+        success: {
+          DEFAULT: '#16a34a',
+          light: '#dcfce7',
+          dark: '#22c55e',
+        },
+        'sync-pending': {
+          DEFAULT: '#d97706',
+          light: '#fef3c7',
+        },
         pasto: {
           50: '#f1f8f4',
           100: '#d8efe0',
           200: '#b3dfc3',
+          300: '#90d1a4',
+          350: '#6dc284',
+          400: '#4baf65',
           500: '#2d6a4f',
+          600: '#285f46',
           700: '#1f4f3a',
-          900: '#1b4332',
+          800: '#1b4332',
+          900: '#17382a',
+          950: '#132e24',
         },
         terra: {
           50: '#faf5ef',
