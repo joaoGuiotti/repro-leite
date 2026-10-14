@@ -1,18 +1,21 @@
 import { ModalCadastroAnimal } from '@/components/rebanho/ModalCadastroAnimal';
 import { ModalSaidaAnimal } from '@/components/rebanho/ModalSaidaAnimal';
 import { CatalogoTouros } from '@/components/touros/CatalogoTouros';
+import { FormularioInseminacaoRapida } from '@/components/inseminacao/FormularioInseminacaoRapida';
+import { HistoricoInseminacoesRecentes } from '@/components/inseminacao/HistoricoInseminacoesRecentes';
 import { DEFAULT_FARM_ID } from '@/db/client';
 import { AnimalRepository } from '@/db/repositories/animalRepository';
 import { BullRepository } from '@/db/repositories/bullRepository';
 import { filterAnimals } from '@/domain/animalFilters';
 import { AnimalRecord, AnimalReproStatus } from '@/types/animal';
 import { BullRecord, CreateBullDTO } from '@/types/bull';
-import { Botao, CampoTexto, Cartao, SeloStatus } from '@/ui';
+import { BadgeBrinco, Botao, CampoTexto, Cartao, SeloStatus } from '@/ui';
 import {
   DoorOpen,
   RotateCcw,
   Search,
   Shield,
+  Sparkles,
   Users,
 } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -26,7 +29,7 @@ import {
 } from 'react-native';
 
 export default function TelaReproducao() {
-  const [secaoAtiva, setSecaoAtiva] = useState<'rebanho' | 'touros'>('rebanho');
+  const [secaoAtiva, setSecaoAtiva] = useState<'rebanho' | 'inseminar' | 'touros'>('rebanho');
   const [carregando, setCarregando] = useState(true);
 
   // Dados
@@ -39,6 +42,10 @@ export default function TelaReproducao() {
     'todas' | 'vazia' | 'inseminada' | 'prenhe' | 'seca'
   >('todas');
   const [mostrarInativos, setMostrarInativos] = useState(false);
+
+  // Inseminação
+  const [vacaPreSelecionada, setVacaPreSelecionada] = useState<AnimalRecord | null>(null);
+  const [refreshHistorico, setRefreshHistorico] = useState(0);
 
   // Modais
   const [modalNovoAnimal, setModalNovoAnimal] = useState(false);
@@ -165,7 +172,7 @@ export default function TelaReproducao() {
 
   return (
     <ScrollView className="flex-1 bg-pasto-50" contentContainerClassName="gap-4 p-4 pb-16">
-      {/* Seletor Segmentado Superior: Rebanho vs Touros */}
+      {/* Seletor Segmentado Superior: Rebanho vs Inseminar vs Touros */}
       <View className="flex-row rounded-2xl bg-gray-200 p-1.5">
         <TouchableOpacity
           onPress={() => setSecaoAtiva('rebanho')}
@@ -175,15 +182,38 @@ export default function TelaReproducao() {
               : 'flex-1 flex-row items-center justify-center rounded-xl py-3 bg-transparent'
           }
         >
-          <Users size={18} color={secaoAtiva === 'rebanho' ? '#ffffff' : '#4b5563'} className="mr-2" />
+          <Users size={16} color={secaoAtiva === 'rebanho' ? '#ffffff' : '#4b5563'} className="mr-1.5" />
           <Text
             className={
               secaoAtiva === 'rebanho'
-                ? 'font-black text-sm text-white'
-                : 'font-black text-sm text-gray-700'
+                ? 'font-black text-xs text-white'
+                : 'font-black text-xs text-gray-700'
             }
           >
             Rebanho ({contadores.total})
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {
+            setVacaPreSelecionada(null);
+            setSecaoAtiva('inseminar');
+          }}
+          className={
+            secaoAtiva === 'inseminar'
+              ? 'flex-1 flex-row items-center justify-center rounded-xl py-3 bg-pasto-700'
+              : 'flex-1 flex-row items-center justify-center rounded-xl py-3 bg-transparent'
+          }
+        >
+          <Sparkles size={16} color={secaoAtiva === 'inseminar' ? '#ffffff' : '#4b5563'} className="mr-1.5" />
+          <Text
+            className={
+              secaoAtiva === 'inseminar'
+                ? 'font-black text-xs text-white'
+                : 'font-black text-xs text-gray-700'
+            }
+          >
+            Inseminar
           </Text>
         </TouchableOpacity>
 
@@ -195,12 +225,12 @@ export default function TelaReproducao() {
               : 'flex-1 flex-row items-center justify-center rounded-xl py-3 bg-transparent'
           }
         >
-          <Shield size={18} color={secaoAtiva === 'touros' ? '#ffffff' : '#4b5563'} className="mr-2" />
+          <Shield size={16} color={secaoAtiva === 'touros' ? '#ffffff' : '#4b5563'} className="mr-1.5" />
           <Text
             className={
               secaoAtiva === 'touros'
-                ? 'font-black text-sm text-white'
-                : 'font-black text-sm text-gray-700'
+                ? 'font-black text-xs text-white'
+                : 'font-black text-xs text-gray-700'
             }
           >
             Touros ({touros.length})
@@ -334,24 +364,24 @@ export default function TelaReproducao() {
                         : 'bg-white border-gray-200'
                       }`}
                   >
-                    <View className="flex-row items-start justify-between">
-                      {/* Identificação */}
-                      <View className="flex-1">
-                        <View className="flex-row items-center gap-2">
-                          <Text className="text-2xl font-black text-gray-950">
-                            #{animal.earTag}
-                          </Text>
-                          {animal.name ? (
-                            <Text className="text-base font-bold text-gray-800">
-                              {animal.name}
-                            </Text>
-                          ) : null}
-                        </View>
+                    <View className="flex-row items-start justify-between gap-3">
+                      {/* Identificação com BadgeBrinco à esquerda */}
+                      <View className="flex-row items-center gap-3 flex-1">
+                        <BadgeBrinco
+                          numero={animal.earTag}
+                          variante={inativo ? 'inativo' : 'padrao'}
+                        />
 
-                        <Text className="text-xs text-gray-500 mt-0.5">
-                          Raça: <Text className="font-semibold text-gray-800">{animal.breed}</Text>
-                          {animal.sex === 'macho' ? ' · Macho' : ''}
-                        </Text>
+                        <View className="flex-1">
+                          <Text className="text-lg font-black text-gray-950" numberOfLines={1}>
+                            {animal.name || `Animal #${animal.earTag}`}
+                          </Text>
+
+                          <Text className="text-xs text-gray-500 mt-0.5">
+                            Raça: <Text className="font-semibold text-gray-800">{animal.breed}</Text>
+                            {animal.sex === 'macho' ? ' · Macho' : ''}
+                          </Text>
+                        </View>
                       </View>
 
                       {/* Selos de Status */}
@@ -386,13 +416,27 @@ export default function TelaReproducao() {
                           <Text className="text-xs font-bold text-pasto-900">Reativar Animal</Text>
                         </TouchableOpacity>
                       ) : (
-                        <TouchableOpacity
-                          onPress={() => setAnimalSelecionadoParaSaida(animal)}
-                          className="flex-row items-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5"
-                        >
-                          <DoorOpen size={14} color="#6b7280" className="mr-1" />
-                          <Text className="text-xs font-semibold text-gray-700">Registrar Saída</Text>
-                        </TouchableOpacity>
+                        <>
+                          {animal.sex === 'femea' && (
+                            <TouchableOpacity
+                              onPress={() => {
+                                setVacaPreSelecionada(animal);
+                                setSecaoAtiva('inseminar');
+                              }}
+                              className="flex-row items-center rounded-lg border border-pasto-700 bg-pasto-100 px-3 py-1.5"
+                            >
+                              <Sparkles size={14} color="#1b4332" className="mr-1" />
+                              <Text className="text-xs font-bold text-pasto-900">Inseminar</Text>
+                            </TouchableOpacity>
+                          )}
+                          <TouchableOpacity
+                            onPress={() => setAnimalSelecionadoParaSaida(animal)}
+                            className="flex-row items-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5"
+                          >
+                            <DoorOpen size={14} color="#6b7280" className="mr-1" />
+                            <Text className="text-xs font-semibold text-gray-700">Registrar Saída</Text>
+                          </TouchableOpacity>
+                        </>
                       )}
                     </View>
                   </View>
@@ -401,6 +445,24 @@ export default function TelaReproducao() {
             )}
           </View>
         </>
+      ) : secaoAtiva === 'inseminar' ? (
+        /* Seção: Lançamento de Inseminação Rápida & Histórico Recente */
+        <View className="gap-4">
+          <FormularioInseminacaoRapida
+            farmId={DEFAULT_FARM_ID}
+            vacaPreSelecionada={vacaPreSelecionada}
+            onInseminacaoConcluida={() => {
+              recarregarDados();
+              setRefreshHistorico((prev) => prev + 1);
+            }}
+          />
+
+          <HistoricoInseminacoesRecentes
+            farmId={DEFAULT_FARM_ID}
+            refreshTrigger={refreshHistorico}
+            onAtualizar={recarregarDados}
+          />
+        </View>
       ) : (
         /* Seção: Catálogo de Touros e Estoque de Sêmen */
         <CatalogoTouros

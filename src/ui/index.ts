@@ -7,3 +7,8 @@ export * from './Cartao';
 export * from './ModalPadrao';
 export * from './SeloStatus';
 export * from './SelectDate';
+export * from './BannerAlerta';
+export * from './PainelProjecaoZootecnica';
+export * from './SeletorItemModal';
+export * from './BadgeEstoqueDoses';
+export * from './BadgeBrinco';

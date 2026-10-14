@@ -20,6 +20,7 @@ export interface SelectDateProps {
   required?: boolean;
   placeholder?: string;
   title?: string;
+  className?: string;
 }
 
 export function SelectDate({
@@ -33,6 +34,7 @@ export function SelectDate({
   required = false,
   placeholder = 'Selecionar data',
   title = 'Selecionar data',
+  className = '',
 }: SelectDateProps) {
   const [modalAberto, setModalAberto] = useState(false);
 
@@ -72,7 +74,7 @@ export function SelectDate({
   };
 
   return (
-    <View className="gap-1">
+    <View className={`gap-1 ${className}`}>
       {rotuloFinal && (
         <Text className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">
           {rotuloFinal} {isRequired && '*'}

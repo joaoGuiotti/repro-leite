@@ -46,7 +46,7 @@ export function CabecalhoStatusSimulador({ compact = false }: CabecalhoStatusSim
   }[state];
 
   return (
-    <View className="bg-white shadow-sm">
+    <View className="bg-pasto-50 shadow-sm">
       {/* 1. Barra de Data de Manejo e Simulador */}
       <CabecalhoDataSimulador />
 

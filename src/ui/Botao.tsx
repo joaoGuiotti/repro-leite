@@ -17,6 +17,8 @@ export interface BotaoProps {
   /** Botões principais têm altura mínima de 56 px (min-h-14); os demais 48 px (min-h-12). */
   principal?: boolean;
   desabilitado?: boolean;
+  className?: string;
+  accessibilityLabel?: string;
 }
 
 export function Botao({
@@ -26,20 +28,24 @@ export function Botao({
   icone,
   principal = false,
   desabilitado = false,
+  className = '',
+  accessibilityLabel,
 }: BotaoProps) {
   const v = VARIANTES[variante];
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={titulo}
+      accessibilityLabel={accessibilityLabel || titulo}
       disabled={desabilitado}
       onPress={onPress}
-      className={`flex-row items-center justify-center gap-2 rounded-xl px-5 ${
+      className={`flex-row items-center justify-center gap-1.5 rounded-xl px-3 ${
         principal ? 'min-h-14' : 'min-h-12'
-      } ${v.caixa} ${desabilitado ? 'opacity-50' : ''}`}
+      } ${v.caixa} ${desabilitado ? 'opacity-50' : ''} ${className}`}
     >
       {icone}
-      <Text className={`text-base font-bold ${v.texto}`}>{titulo}</Text>
+      <Text className={`text-sm font-extrabold ${v.texto}`} numberOfLines={1}>
+        {titulo}
+      </Text>
     </Pressable>
   );
 }

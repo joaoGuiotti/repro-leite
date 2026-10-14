@@ -36,6 +36,12 @@ export interface AnimalRecord extends BaseEntity {
   exitStatus: AnimalExitStatus;
   exitDate?: string | null;
   exitReason?: string | null;
+  sireId?: string | null;
+  sireName?: string | null;
+  damId?: string | null;
+  damName?: string | null;
+  maternalGrandsireName?: string | null;
+  paternalGrandsireName?: string | null;
   notes?: string | null;
 }
 
@@ -50,6 +56,12 @@ export interface AnimalSummary {
   reproStatus?: AnimalReproStatus;
   exitStatus: AnimalExitStatus;
   exitDate?: string | null;
+  sireId?: string | null;
+  sireName?: string | null;
+  damId?: string | null;
+  damName?: string | null;
+  maternalGrandsireName?: string | null;
+  paternalGrandsireName?: string | null;
   deletedAt?: string | null;
 }
 
@@ -82,6 +94,12 @@ export interface CreateAnimalDTO {
   birthWeightKg?: number;
   lifeStage?: AnimalLifeStage;
   reproStatus?: AnimalReproStatus;
+  sireId?: string | null;
+  sireName?: string | null;
+  damId?: string | null;
+  damName?: string | null;
+  maternalGrandsireName?: string | null;
+  paternalGrandsireName?: string | null;
   notes?: string | null;
 }
 

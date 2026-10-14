@@ -32,7 +32,10 @@ export default function RootLayout() {
           <SafeAreaView edges={['top']} className="flex-1 bg-white">
             <StatusBar style="dark" />
             <CabecalhoStatusSimulador />
-            <Stack screenOptions={{ headerShown: false }} />
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="index" options={{ headerShown: false }} />
+            </Stack>
             {!isDbReady && (
               <View className="absolute inset-0 z-50 items-center justify-center bg-pasto-50 p-6">
                 <ActivityIndicator size="large" color="#1b4332" />

@@ -142,7 +142,69 @@ export async function initDatabase(): Promise<void> {
 
     CREATE INDEX IF NOT EXISTS idx_bulls_farm 
     ON bulls (farm_id, deleted_at);
+
+    CREATE TABLE IF NOT EXISTS inseminations (
+      id TEXT PRIMARY KEY NOT NULL,
+      farm_id TEXT NOT NULL REFERENCES farms(id),
+      animal_id TEXT NOT NULL REFERENCES animals(id),
+      bull_id TEXT REFERENCES bulls(id),
+      bull_name TEXT NOT NULL,
+      date TEXT NOT NULL,
+      inseminator TEXT NOT NULL,
+      expected_heat_date TEXT NOT NULL,
+      pregnancy_check_date TEXT NOT NULL,
+      expected_calving_date TEXT NOT NULL,
+      dry_off_date TEXT NOT NULL,
+      result TEXT NOT NULL DEFAULT 'pendente',
+      notes TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_inseminations_farm 
+    ON inseminations (farm_id, deleted_at);
+
+    CREATE INDEX IF NOT EXISTS idx_inseminations_animal 
+    ON inseminations (animal_id, date, deleted_at);
+
+    CREATE TABLE IF NOT EXISTS alerts (
+      id TEXT PRIMARY KEY NOT NULL,
+      farm_id TEXT NOT NULL REFERENCES farms(id),
+      target_animal_id TEXT NOT NULL REFERENCES animals(id),
+      type TEXT NOT NULL,
+      due_date TEXT NOT NULL,
+      completed_at TEXT,
+      source_id TEXT,
+      notes TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      deleted_at TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_alerts_farm_due 
+    ON alerts (farm_id, due_date, completed_at, deleted_at);
+
+    CREATE INDEX IF NOT EXISTS idx_alerts_source 
+    ON alerts (source_id, deleted_at);
   `);
+
+  // Garante que colunas de filiação existam na tabela animals se já foi criada previamente
+  const colsToAdd = [
+    'sire_id TEXT',
+    'sire_name TEXT',
+    'dam_id TEXT',
+    'dam_name TEXT',
+    'maternal_grandsire_name TEXT',
+    'paternal_grandsire_name TEXT',
+  ];
+  for (const col of colsToAdd) {
+    try {
+      rawDb.execSync(`ALTER TABLE animals ADD COLUMN ${col};`);
+    } catch {
+      // Ignora erro se coluna já existir
+    }
+  }
 
   await ensureDefaultFarm();
 }
