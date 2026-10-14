@@ -17,6 +17,7 @@ export * from './infra/insemination.sqlite.repository';
 export * from './presentation/components/FormularioInseminacaoRapida';
 export * from './presentation/components/HistoricoInseminacoesRecentes';
 export * from './presentation/components/ModalAbastecimentoDoses';
+export * from './presentation/components/PainelProjecaoZootecnica';
 export * from './presentation/screens/InseminationScreen';
 
 // Presentation Hooks

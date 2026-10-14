@@ -12,7 +12,7 @@ import {
   SeletorItemModal,
   hapticFeedback,
 } from '@/ui';
-import { PainelProjecaoZootecnica } from '@features/reproduction';
+import { PainelProjecaoZootecnica } from './PainelProjecaoZootecnica';
 import { CheckCircle2, ChevronDown, Repeat } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
