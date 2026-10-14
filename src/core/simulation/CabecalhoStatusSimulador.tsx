@@ -37,6 +37,12 @@ export function CabecalhoStatusSimulador({ compact = false }: CabecalhoStatusSim
       icon: <RefreshCw size={14} color="#1e40af" />,
       label: 'Sincronizando...',
     },
+    offline: {
+      bg: 'bg-gray-200',
+      text: 'text-gray-700',
+      icon: <CloudOff size={14} color="#4b5563" />,
+      label: 'Curral Offline',
+    },
     error: {
       bg: 'bg-alerta-100',
       text: 'text-alerta-700',

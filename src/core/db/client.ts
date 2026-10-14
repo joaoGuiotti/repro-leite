@@ -80,15 +80,22 @@ export async function initDatabase(): Promise<void> {
 
     CREATE TABLE IF NOT EXISTS sync_queue (
       id TEXT PRIMARY KEY NOT NULL,
+      operation_id TEXT,
       farm_id TEXT NOT NULL,
       table_name TEXT NOT NULL,
       record_id TEXT NOT NULL,
       operation TEXT NOT NULL,
       payload_json TEXT,
+      status TEXT NOT NULL DEFAULT 'pending',
       attempts INTEGER NOT NULL DEFAULT 0,
+      next_retry_at TEXT,
       last_error TEXT,
-      created_at TEXT NOT NULL
+      created_at TEXT NOT NULL,
+      updated_at TEXT
     );
+
+    CREATE INDEX IF NOT EXISTS idx_sync_queue_status_retry 
+    ON sync_queue (farm_id, status, next_retry_at);
 
     CREATE TABLE IF NOT EXISTS sync_state (
       id TEXT PRIMARY KEY NOT NULL,
@@ -96,6 +103,7 @@ export async function initDatabase(): Promise<void> {
       last_pulled_at TEXT,
       last_pushed_at TEXT,
       last_success_at TEXT,
+      server_rev INTEGER DEFAULT 0,
       updated_at TEXT NOT NULL
     );
 
@@ -206,6 +214,30 @@ export async function initDatabase(): Promise<void> {
     }
   }
 
+  // Migrações incrementais para sync_queue e sync_state
+  const syncQueueCols = [
+    'operation_id TEXT',
+    "status TEXT NOT NULL DEFAULT 'pending'",
+    'next_retry_at TEXT',
+    'updated_at TEXT',
+  ];
+  for (const col of syncQueueCols) {
+    try {
+      rawDb.execSync(`ALTER TABLE sync_queue ADD COLUMN ${col};`);
+    } catch {
+      // Ignora erro se coluna já existir
+    }
+  }
+
+  const syncStateCols = ['server_rev INTEGER DEFAULT 0'];
+  for (const col of syncStateCols) {
+    try {
+      rawDb.execSync(`ALTER TABLE sync_state ADD COLUMN ${col};`);
+    } catch {
+      // Ignora erro se coluna já existir
+    }
+  }
+
   await ensureDefaultFarm();
 }
 
@@ -256,23 +288,28 @@ export async function executeTransactionalMutation(
   const db = getDatabase();
   const rawDb = getExpoDatabase();
   const now = new Date().toISOString();
+  const opId = generateUUID();
 
   // Executa transação SQLite
   rawDb.execSync('BEGIN TRANSACTION;');
   try {
     await mutationFn();
 
-    // Enfileira na sync_queue
+    // Enfileira na sync_queue com status pending e operationId único
     await db.insert(schema.syncQueue).values({
-      id: generateUUID(),
+      id: opId,
+      operationId: opId,
       farmId: syncInfo.farmId,
       tableName: syncInfo.tableName,
       recordId: syncInfo.recordId,
       operation: syncInfo.operation,
       payloadJson: syncInfo.payloadJson ? JSON.stringify(syncInfo.payloadJson) : null,
+      status: 'pending',
       attempts: 0,
+      nextRetryAt: null,
       lastError: null,
       createdAt: now,
+      updatedAt: now,
     });
 
     rawDb.execSync('COMMIT;');

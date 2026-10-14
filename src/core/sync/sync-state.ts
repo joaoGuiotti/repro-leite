@@ -1,4 +1,4 @@
-export type SyncProtectionState = 'protected' | 'pending' | 'syncing' | 'error';
+export type SyncProtectionState = 'protected' | 'pending' | 'syncing' | 'offline' | 'error';
 
 /**
  * Determina o estado visual de proteção do app com base nas pendências e estado da rede.
@@ -6,10 +6,14 @@ export type SyncProtectionState = 'protected' | 'pending' | 'syncing' | 'error';
 export function resolveProtectionStatus(
   pendingCount: number,
   isSyncing: boolean,
-  hasError: boolean = false
+  hasError: boolean = false,
+  isOnline: boolean = true
 ): SyncProtectionState {
   if (isSyncing) {
     return 'syncing';
+  }
+  if (!isOnline) {
+    return 'offline';
   }
   if (hasError) {
     return 'error';
@@ -39,6 +43,10 @@ export function getSyncStateDescription(
         : `${pendingCount} alterações pendentes (Modo Curral)`;
     case 'syncing':
       return 'Sincronizando com Supabase...';
+    case 'offline':
+      return pendingCount > 0
+        ? `${pendingCount} ${pendingCount === 1 ? 'alteração pendente' : 'alterações pendentes'} (Modo Curral Offline)`
+        : 'Modo Curral Offline';
     case 'error':
       return 'Falha na sincronização';
   }

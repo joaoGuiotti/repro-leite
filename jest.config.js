@@ -13,6 +13,8 @@ module.exports = {
   },
   moduleNameMapper: {
     '^expo-sqlite$': '<rootDir>/__mocks__/expo-sqlite.ts',
+    '^react-native$': '<rootDir>/__mocks__/react-native.js',
+    '^@react-native-community/netinfo$': '<rootDir>/node_modules/@react-native-community/netinfo/jest/netinfo-mock.js',
     '^@features/(.*)$': '<rootDir>/src/features/$1',
     '^@core/(.*)$': '<rootDir>/src/core/$1',
     '^@ui/(.*)$': '<rootDir>/src/ui/$1',
