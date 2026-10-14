@@ -7,7 +7,7 @@ import { BullRepository } from '@/db/repositories/bullRepository';
 import { filterAnimals } from '@/domain/animalFilters';
 import { AnimalRecord, AnimalReproStatus } from '@/types/animal';
 import { BullRecord, CreateBullDTO } from '@/types/bull';
-import { Botao, CampoNumerico, Cartao, SeloStatus } from '@/ui';
+import { Botao, CampoTexto, Cartao, SeloStatus } from '@/ui';
 import {
   DoorOpen,
   RotateCcw,
@@ -254,11 +254,13 @@ export default function TelaReproducao() {
 
           {/* Busca e Filtros */}
           <Cartao titulo="Buscar no Rebanho">
-            <CampoNumerico
+            <CampoTexto
               rotulo="Buscar por Brinco ou Nome"
               valor={buscaBrinco}
               onChange={setBuscaBrinco}
               placeholder="Digite o brinco (ex: 104) ou nome"
+              iconeEsquerda={<Search size={18} color="#6b7280" />}
+              limpavel
             />
 
             {/* Pílulas de Filtro Reprodutivo */}

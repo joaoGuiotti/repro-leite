@@ -1,10 +1,9 @@
-import React from 'react';
-import { ScrollView, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
-import { PlusCircle, Baby, Share2 } from 'lucide-react-native';
-import { Cartao, SeloStatus, Botao } from '@/ui';
 import { useManagementDate } from '@/context/ManagementDateContext';
 import { formatToDisplay } from '@/domain/dateSimulation';
+import { Botao, Cartao, SeloStatus } from '@/ui';
+import { useRouter } from 'expo-router';
+import { Baby, PlusCircle, Share2 } from 'lucide-react-native';
+import { ScrollView, Text, View } from 'react-native';
 
 export default function TelaHoje() {
   const router = useRouter();
@@ -34,7 +33,7 @@ export default function TelaHoje() {
       <Cartao titulo="Ações Rápidas">
         <View className="gap-2.5">
           <Botao
-            titulo="Lançar Inseminação (3 Toques)"
+            titulo="Lançar Inseminação"
             icone={<PlusCircle size={20} color="#ffffff" />}
             onPress={() => router.push('/(tabs)/reproducao')}
             variante="primario"

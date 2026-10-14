@@ -1,6 +1,5 @@
-import React from 'react';
-import { View, Text, Pressable } from 'react-native';
 import { Calendar } from 'lucide-react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useManagementDate } from '../context/ManagementDateContext';
 import { formatToDisplay } from '../domain/dateSimulation';
 
@@ -8,17 +7,16 @@ export function CabecalhoDataSimulador() {
   const { activeDateString, isSimulated, advanceDays, resetToToday } = useManagementDate();
 
   return (
-    <View className="flex-row flex-wrap items-center justify-between gap-2 border-b border-pasto-200 bg-pasto-50 px-4 py-2">
+    <View className="flex-row flex-wrap items-center justify-between gap-2 border-b border-pasto-200 bg-pasto-700 px-4 py-2">
       {/* Indicador da Data Ativa */}
       <View className="flex-row items-center gap-2">
-        <Calendar size={16} color="#1b4332" />
-        <Text className="text-xs font-semibold uppercase tracking-wider text-pasto-700">
+        <Calendar size={16} color="#fff" />
+        <Text className="text-xs font-semibold uppercase tracking-wider text-white">
           Data de Manejo:
         </Text>
         <View
-          className={`rounded-lg px-2.5 py-1 ${
-            isSimulated ? 'bg-ambar-500' : 'bg-pasto-700'
-          }`}
+          className={`rounded-lg p-1 ${isSimulated ? 'bg-ambar-500' : 'bg-pasto-700'
+            }`}
         >
           <Text className="text-sm font-bold text-white">
             {formatToDisplay(activeDateString)}

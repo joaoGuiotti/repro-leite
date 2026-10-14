@@ -7,24 +7,61 @@ import '@/global.css';
 
 import { Platform } from 'react-native';
 
-export const Colors = {
-  light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+export const TailwindColors = {
+  pasto: {
+    50: '#f1f8f4',
+    100: '#d8efe0',
+    200: '#b3dfc3',
+    500: '#2d6a4f',
+    700: '#1f4f3a',
+    900: '#1b4332',
   },
-  dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+  terra: {
+    50: '#faf5ef',
+    100: '#efe3d2',
+    500: '#8b5e3c',
+    700: '#5e3d25',
+  },
+  ambar: {
+    100: '#fdecc8',
+    500: '#e09f1f',
+    700: '#8a5a00',
+  },
+  alerta: {
+    100: '#fde2e2',
+    700: '#9b1c1c',
   },
 } as const;
 
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
+export const Colors = {
+  light: {
+    primary: TailwindColors.pasto[700],
+    primaryDark: TailwindColors.pasto[900],
+    primaryLight: TailwindColors.pasto[500],
+    text: '#111827',
+    textSecondary: '#6b7280',
+    background: '#ffffff',
+    backgroundElement: '#f3f4f6',
+    backgroundSelected: '#f1f8f4',
+    border: '#e5e7eb',
+    ...TailwindColors,
+  },
+  dark: {
+    primary: '#2d6a4f',
+    primaryDark: '#1b4332',
+    primaryLight: '#b3dfc3',
+    text: '#f9fafb',
+    textSecondary: '#9ca3af',
+    background: '#111827',
+    backgroundElement: '#1f2937',
+    backgroundSelected: '#1f4f3a',
+    border: '#374151',
+    ...TailwindColors,
+  },
+} as const;
+
+export type ThemeColors = typeof Colors.light | typeof Colors.dark;
+export type ThemeColor = keyof typeof Colors.light;
 
 export const Fonts = Platform.select({
   ios: {

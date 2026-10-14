@@ -2,6 +2,7 @@ export * from './Botao';
 export * from './CabecalhoDataSimulador';
 export * from './CabecalhoStatusSimulador';
 export * from './CampoNumerico';
+export * from './CampoTexto';
 export * from './Cartao';
 export * from './ModalPadrao';
 export * from './SeloStatus';

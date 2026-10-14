@@ -1,16 +1,17 @@
-import React from 'react';
+import { useTheme } from '@/hooks/use-theme';
 import { Tabs } from 'expo-router';
+import { Activity, Calendar, Milk, Settings } from 'lucide-react-native';
 import { View } from 'react-native';
-import { Calendar, Milk, Activity, Settings } from 'lucide-react-native';
 
 export default function TabsLayout() {
+  const { theme } = useTheme();
   return (
     <View className="flex-1 bg-pasto-50">
       <Tabs
         screenOptions={{
           headerShown: false,
-          tabBarActiveTintColor: '#1b4332',
-          tabBarInactiveTintColor: '#64748b',
+          tabBarActiveTintColor: theme.colors.primary,
+          tabBarInactiveTintColor: theme.colors.textSecondary,
           tabBarLabelStyle: { fontSize: 12, fontWeight: '700' },
           tabBarStyle: { height: 64, paddingBottom: 8, paddingTop: 6 },
         }}

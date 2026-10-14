@@ -17,6 +17,8 @@ interface CatalogoTourosProps {
   farmId: string;
 }
 
+const RACAS_SUGERIDAS = ['Gir Leiteiro', 'Holandesa', 'Girolando', 'Jersey', 'Pardo Suíço'];
+
 export function CatalogoTouros({
   touros,
   onCadastrarTouro,
@@ -178,10 +180,31 @@ export function CatalogoTouros({
 
           <View className="mb-3">
             <Text className="mb-1 text-sm font-semibold text-gray-700">Raça *</Text>
+            <View className="flex-row flex-wrap gap-1.5 mb-2">
+              {RACAS_SUGERIDAS.map((r) => (
+                <TouchableOpacity
+                  key={r}
+                  onPress={() => setRaca(r)}
+                  className={`px-3 py-1.5 rounded-xl border ${
+                    raca === r
+                      ? 'bg-pasto-100 border-pasto-700'
+                      : 'bg-gray-50 border-gray-200'
+                  }`}
+                >
+                  <Text
+                    className={`text-xs font-bold ${
+                      raca === r ? 'text-pasto-900' : 'text-gray-700'
+                    }`}
+                  >
+                    {r}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
             <TextInput
               value={raca}
               onChangeText={setRaca}
-              placeholder="Ex: Gir Leiteiro, Holandês, Jersey"
+              placeholder="Digite ou selecione a raça"
               className="h-12 rounded-xl border border-gray-300 bg-white px-4 text-base text-gray-900"
             />
           </View>
