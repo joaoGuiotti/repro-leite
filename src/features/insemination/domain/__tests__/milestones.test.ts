@@ -1,8 +1,8 @@
 import {
   calculateReproductiveMilestones,
   resolveAnimalReproStatusAfterCancellation,
-} from '../../src/domain/reproduction';
-import { InseminationRecord } from '../../src/types/insemination';
+} from '../milestones';
+import { InseminationRecord } from '../insemination.entity';
 
 describe('Domain: reproduction (Cálculo Puro dos Marcos Reprodutivos)', () => {
   test('calculateReproductiveMilestones deve calcular os 4 marcos corretamente a partir da data da IA', () => {

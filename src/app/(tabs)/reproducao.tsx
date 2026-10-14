@@ -1,8 +1,7 @@
-import { FormularioInseminacaoRapida } from '@/components/inseminacao/FormularioInseminacaoRapida';
-import { HistoricoInseminacoesRecentes } from '@/components/inseminacao/HistoricoInseminacoesRecentes';
 import { DEFAULT_FARM_ID } from '@core/db';
 import { AnimalRecord, HerdScreen } from '@features/herd';
 import { BullsScreen } from '@features/bulls';
+import { InseminationScreen } from '@features/insemination';
 import { Shield, Sparkles, Users } from 'lucide-react-native';
 import { useState } from 'react';
 import {
@@ -21,7 +20,6 @@ export default function TelaReproducao() {
 
   // Inseminação
   const [vacaPreSelecionada, setVacaPreSelecionada] = useState<AnimalRecord | null>(null);
-  const [refreshHistorico, setRefreshHistorico] = useState(0);
 
   return (
     <ScrollView className="flex-1 bg-pasto-50" contentContainerClassName="gap-4 p-4 pb-16">
@@ -115,20 +113,10 @@ export default function TelaReproducao() {
         />
       ) : secaoAtiva === 'inseminar' ? (
         /* Seção: Lançamento de Inseminação Rápida & Histórico Recente */
-        <View className="gap-4">
-          <FormularioInseminacaoRapida
-            farmId={DEFAULT_FARM_ID}
-            vacaPreSelecionada={vacaPreSelecionada}
-            onInseminacaoConcluida={() => {
-              setRefreshHistorico((prev) => prev + 1);
-            }}
-          />
-
-          <HistoricoInseminacoesRecentes
-            farmId={DEFAULT_FARM_ID}
-            refreshTrigger={refreshHistorico}
-          />
-        </View>
+        <InseminationScreen
+          farmId={DEFAULT_FARM_ID}
+          vacaPreSelecionada={vacaPreSelecionada}
+        />
       ) : (
         /* Seção: Catálogo de Touros e Estoque de Sêmen gerenciada por @features/bulls */
         <BullsScreen
