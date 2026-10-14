@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { BadgeBrinco } from './BadgeBrinco';
 import { ModalPadrao } from './ModalPadrao';
 
 export interface ItemSeletor {
@@ -163,7 +162,14 @@ export function SeletorItemModal({
                 >
                   <View className="flex-1 pr-2 flex-row items-center gap-3">
                     {item.numeroBrinco ? (
-                      <BadgeBrinco numero={item.numeroBrinco} tamanho="sm" />
+                      <View className="min-w-[44px] min-h-[42px] px-1.5 py-1 rounded-xl bg-white border border-gray-200/90 items-center justify-center">
+                        <Text className="text-[8px] font-black uppercase tracking-wider text-slate-400" numberOfLines={1}>
+                          BRINCO
+                        </Text>
+                        <Text className="text-sm font-black tracking-tight leading-tight text-gray-950" numberOfLines={1}>
+                          {item.numeroBrinco}
+                        </Text>
+                      </View>
                     ) : null}
                     <View className="flex-1">
                       <Text className="text-base font-bold text-gray-900" numberOfLines={1}>

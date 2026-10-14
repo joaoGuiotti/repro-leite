@@ -1,4 +1,4 @@
-import { advanceDays } from '@core/simulation';
+import { advanceDays } from '@core/simulation/date-simulation';
 import {
   InseminationMilestones,
   InseminationRecord,

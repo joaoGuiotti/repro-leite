@@ -1,13 +1,12 @@
-import '../global.css';
-import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator, Text } from 'react-native';
+import { initDatabase } from '@core/db';
+import { CabecalhoStatusSimulador, ManagementDateProvider } from '@core/simulation';
+import { SyncStatusProvider } from '@core/sync';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Text, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { ManagementDateProvider } from '@core/simulation';
-import { SyncStatusProvider } from '@core/sync';
-import { CabecalhoStatusSimulador } from '../ui/CabecalhoStatusSimulador';
-import { initDatabase } from '@core/db';
+import '../global.css';
 
 export default function RootLayout() {
   const [isDbReady, setIsDbReady] = useState(false);
@@ -32,7 +31,7 @@ export default function RootLayout() {
           <SafeAreaView edges={['top']} className="flex-1 bg-white">
             <StatusBar style="dark" />
             <CabecalhoStatusSimulador />
-            <Stack screenOptions={{ headerShown: false }}>
+            <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="index" options={{ headerShown: false }} />
             </Stack>

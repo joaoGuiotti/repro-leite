@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { ModalPadrao } from './ModalPadrao';
+import { ModalPadrao } from '../overlays/ModalPadrao';
 
 export interface SelectDateProps {
   rotulo?: string;

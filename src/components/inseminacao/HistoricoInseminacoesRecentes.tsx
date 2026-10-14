@@ -2,7 +2,8 @@ import {
   InseminationRepository,
   InseminationWithAnimalSummary,
 } from '@/db/repositories/inseminationRepository';
-import { BadgeBrinco, Botao, Cartao, ModalPadrao } from '@/ui';
+import { Botao, Cartao, ModalPadrao } from '@/ui';
+import { BadgeBrinco } from '@features/herd';
 import { History, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import {

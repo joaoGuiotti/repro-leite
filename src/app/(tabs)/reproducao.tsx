@@ -9,7 +9,8 @@ import { BullRepository } from '@/db/repositories/bullRepository';
 import { filterAnimals } from '@/domain/animalFilters';
 import { AnimalRecord, AnimalReproStatus } from '@/types/animal';
 import { BullRecord, CreateBullDTO } from '@/types/bull';
-import { BadgeBrinco, Botao, CampoTexto, Cartao, SeloStatus } from '@/ui';
+import { Botao, CampoTexto, Cartao, SeloStatus } from '@/ui';
+import { BadgeBrinco } from '@features/herd';
 import {
   DoorOpen,
   RotateCcw,
