@@ -1,25 +1,48 @@
-import { IndicadorSync } from '@/components/ui';
+import React from 'react';
 import { Tabs } from 'expo-router';
 import { View } from 'react-native';
+import { Calendar, Milk, Activity, Settings } from 'lucide-react-native';
 
 export default function TabsLayout() {
   return (
     <View className="flex-1 bg-pasto-50">
-      {/* TODO Sprint 2: ligar ao estado real do sync */}
-      <IndicadorSync status="pendente" mensagem="Sync ainda não configurado" />
       <Tabs
         screenOptions={{
-          headerStyle: { backgroundColor: '#1b4332' },
-          headerTintColor: '#ffffff',
+          headerShown: false,
           tabBarActiveTintColor: '#1b4332',
-          tabBarLabelStyle: { fontSize: 14, fontWeight: '700' },
-          tabBarStyle: { height: 64, paddingBottom: 8 },
+          tabBarInactiveTintColor: '#64748b',
+          tabBarLabelStyle: { fontSize: 12, fontWeight: '700' },
+          tabBarStyle: { height: 64, paddingBottom: 8, paddingTop: 6 },
         }}
       >
-        <Tabs.Screen name="hoje" options={{ title: 'Hoje' }} />
-        <Tabs.Screen name="bezerras" options={{ title: 'Bezerras' }} />
-        <Tabs.Screen name="reproducao" options={{ title: 'Reprodução' }} />
-        <Tabs.Screen name="ajustes" options={{ title: 'Ajustes' }} />
+        <Tabs.Screen
+          name="hoje"
+          options={{
+            title: 'Hoje',
+            tabBarIcon: ({ color, size }) => <Calendar color={color} size={size ?? 22} />,
+          }}
+        />
+        <Tabs.Screen
+          name="bezerras"
+          options={{
+            title: 'Bezerras',
+            tabBarIcon: ({ color, size }) => <Milk color={color} size={size ?? 22} />,
+          }}
+        />
+        <Tabs.Screen
+          name="reproducao"
+          options={{
+            title: 'Reprodução',
+            tabBarIcon: ({ color, size }) => <Activity color={color} size={size ?? 22} />,
+          }}
+        />
+        <Tabs.Screen
+          name="ajustes"
+          options={{
+            title: 'Ajustes',
+            tabBarIcon: ({ color, size }) => <Settings color={color} size={size ?? 22} />,
+          }}
+        />
       </Tabs>
     </View>
   );

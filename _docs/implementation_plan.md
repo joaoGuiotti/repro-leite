@@ -383,6 +383,7 @@ Se o projeto passar dos limites gratuitos ou o produtor quiser backup gerenciado
 | Export | `expo-print`, `expo-file-system`, `expo-sharing` |
 | Segurança | `expo-secure-store` |
 | Gráficos | `victory-native` ou `react-native-svg` simples (GMD) |
+| Ícones | `lucide-react-native` (com `react-native-svg`) para iconografia rural |
 | Testes | Jest (regras de domínio), Maestro ou Detox (fluxos principais) |
 | Build/Distribuição | EAS Build, EAS Update, Google Play (Android primeiro) |
 
