@@ -13,7 +13,7 @@ export default function TabsLayout() {
           tabBarActiveTintColor: theme.colors.primary,
           tabBarInactiveTintColor: theme.colors.textSecondary,
           tabBarLabelStyle: { fontSize: 12, fontWeight: '700' },
-          tabBarStyle: { height: 64, paddingBottom: 8, paddingTop: 6 },
+          tabBarStyle: { height: 80, paddingBottom: 8, paddingTop: 6 },
         }}
       >
         <Tabs.Screen

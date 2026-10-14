@@ -31,7 +31,7 @@ export default function RootLayout() {
           <SafeAreaView edges={['top']} className="flex-1 bg-white">
             <StatusBar style="dark" />
             <CabecalhoStatusSimulador />
-            <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
+            <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="index" options={{ headerShown: false }} />
             </Stack>
