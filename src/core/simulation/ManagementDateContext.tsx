@@ -4,9 +4,9 @@ import {
   advanceDays as domainAdvanceDays,
   isSimulatedDate,
   parseDateString,
-} from '../domain/dateSimulation';
-import { SettingsRepository } from '../db/repositories/settingsRepository';
-import { DEFAULT_FARM_ID } from '../db/client';
+} from './date-simulation';
+import { SettingsRepository } from '@/db/repositories/settingsRepository';
+import { DEFAULT_FARM_ID } from '@/db/client';
 
 export interface ManagementDateContextType {
   activeDateString: string;

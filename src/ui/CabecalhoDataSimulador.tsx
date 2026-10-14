@@ -1,7 +1,6 @@
 import { Calendar } from 'lucide-react-native';
 import { Pressable, Text, View } from 'react-native';
-import { useManagementDate } from '../context/ManagementDateContext';
-import { formatToDisplay } from '../domain/dateSimulation';
+import { useManagementDate, formatToDisplay } from '@core/simulation';
 
 export function CabecalhoDataSimulador() {
   const { activeDateString, isSimulated, advanceDays, resetToToday } = useManagementDate();

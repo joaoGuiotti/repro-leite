@@ -1,4 +1,4 @@
-import { useManagementDate } from '@/context/ManagementDateContext';
+import { useManagementDate } from '@core/simulation';
 import { AnimalRepository } from '@/db/repositories/animalRepository';
 import { BullRepository } from '@/db/repositories/bullRepository';
 import { InseminationRepository } from '@/db/repositories/inseminationRepository';

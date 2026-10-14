@@ -1,5 +1,4 @@
-import { useManagementDate } from '@/context/ManagementDateContext';
-import { formatToDisplay } from '@/domain/dateSimulation';
+import { useManagementDate, formatToDisplay } from '@core/simulation';
 import { Botao, Cartao, SeloStatus } from '@/ui';
 import { useRouter } from 'expo-router';
 import { Baby, PlusCircle, Share2 } from 'lucide-react-native';
