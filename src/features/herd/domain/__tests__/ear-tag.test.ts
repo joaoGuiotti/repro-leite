@@ -1,5 +1,5 @@
-import { normalizeEarTag, evaluateEarTagAvailability } from '../../src/domain/earTag';
-import { AnimalSummary } from '../../src/types/animal';
+import { normalizeEarTag, evaluateEarTagAvailability } from '../ear-tag';
+import { AnimalSummary } from '../animal.entity';
 
 describe('Domain: earTag (Normalização e Política de Reuso)', () => {
   describe('normalizeEarTag', () => {

@@ -1,5 +1,5 @@
-import { filterAnimals } from '../../src/domain/animalFilters';
-import { AnimalSummary } from '../../src/types/animal';
+import { filterAnimals } from '../animal-filters';
+import { AnimalSummary } from '../animal.entity';
 
 describe('Domain: animalFilters', () => {
   const mockAnimals: AnimalSummary[] = [
