@@ -393,30 +393,30 @@ export function RegisterCalfModal({
             placeholder="Anotações de parto, vigor do bezerro..."
           />
         </ScrollView>
+
+        {/* Modal seletor de Touros */}
+        <SeletorItemModal
+          visivel={seletorTouroAberto}
+          onFechar={() => setSeletorTouroAberto(false)}
+          onSelecionar={handleSelecionarTouro}
+          tituloModal="Selecionar Touro (Pai)"
+          placeholderBusca="Buscar por nome ou raça..."
+          itens={itensTouros}
+          itemSelecionadoId={touroSelecionado?.id}
+        />
+
+        {/* Modal seletor de Vacas */}
+        <SeletorItemModal
+          visivel={seletorVacaAberto}
+          onFechar={() => setSeletorVacaAberto(false)}
+          onSelecionar={handleSelecionarVaca}
+          tituloModal="Selecionar Vaca Mãe"
+          placeholderBusca="Buscar por brinco ou nome..."
+          tipoTeclado="numeric"
+          itens={itensVacas}
+          itemSelecionadoId={vacaSelecionada?.id}
+        />
       </ModalPadrao>
-
-      {/* Modal seletor de Touros */}
-      <SeletorItemModal
-        visivel={seletorTouroAberto}
-        onFechar={() => setSeletorTouroAberto(false)}
-        onSelecionar={handleSelecionarTouro}
-        tituloModal="Selecionar Touro (Pai)"
-        placeholderBusca="Buscar por nome ou raça..."
-        itens={itensTouros}
-        itemSelecionadoId={touroSelecionado?.id}
-      />
-
-      {/* Modal seletor de Vacas */}
-      <SeletorItemModal
-        visivel={seletorVacaAberto}
-        onFechar={() => setSeletorVacaAberto(false)}
-        onSelecionar={handleSelecionarVaca}
-        tituloModal="Selecionar Vaca Mãe"
-        placeholderBusca="Buscar por brinco ou nome..."
-        tipoTeclado="numeric"
-        itens={itensVacas}
-        itemSelecionadoId={vacaSelecionada?.id}
-      />
     </>
   );
 }
