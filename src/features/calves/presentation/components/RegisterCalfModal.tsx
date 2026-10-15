@@ -2,11 +2,13 @@ import {
   Botao,
   CampoNumerico,
   CampoTexto,
+  Icon,
   ItemSeletor,
   ModalPadrao,
   SelectDate,
   SeletorItemModal,
 } from '@/ui';
+import { Dna } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import {
   ScrollView,
@@ -219,7 +221,7 @@ export function RegisterCalfModal({
           </View>
 
           {/* Sexo */}
-          <View className="gap-1.5">
+          <View className="gap-1.5 mt-2">
             <Text className="text-sm font-bold text-gray-800 dark:text-gray-200">
               Sexo *
             </Text>
@@ -227,14 +229,14 @@ export function RegisterCalfModal({
               <TouchableOpacity
                 onPress={() => setSexo('femea')}
                 className={`flex-1 py-3 px-4 rounded-xl border items-center justify-center ${sexo === 'femea'
-                    ? 'bg-pasto-100 border-pasto-600 dark:bg-pasto-950/60 dark:border-pasto-500'
-                    : 'bg-white border-gray-200 dark:bg-slate-900 dark:border-slate-800'
+                  ? 'bg-pasto-100 border-pasto-600 dark:bg-pasto-950/60 dark:border-pasto-500'
+                  : 'bg-white border-gray-200 dark:bg-slate-900 dark:border-slate-800'
                   }`}
               >
                 <Text
                   className={`text-sm font-bold ${sexo === 'femea'
-                      ? 'text-pasto-900 dark:text-pasto-200'
-                      : 'text-gray-600 dark:text-gray-400'
+                    ? 'text-pasto-900 dark:text-pasto-200'
+                    : 'text-gray-600 dark:text-gray-400'
                     }`}
                 >
                   Fêmea (Recria / Leite)
@@ -244,14 +246,14 @@ export function RegisterCalfModal({
               <TouchableOpacity
                 onPress={() => setSexo('macho')}
                 className={`flex-1 py-3 px-4 rounded-xl border items-center justify-center ${sexo === 'macho'
-                    ? 'bg-blue-100 border-blue-600 dark:bg-blue-950/60 dark:border-blue-500'
-                    : 'bg-white border-gray-200 dark:bg-slate-900 dark:border-slate-800'
+                  ? 'bg-blue-100 border-blue-600 dark:bg-blue-950/60 dark:border-blue-500'
+                  : 'bg-white border-gray-200 dark:bg-slate-900 dark:border-slate-800'
                   }`}
               >
                 <Text
                   className={`text-sm font-bold ${sexo === 'macho'
-                      ? 'text-blue-900 dark:text-blue-200'
-                      : 'text-gray-600 dark:text-gray-400'
+                    ? 'text-blue-900 dark:text-blue-200'
+                    : 'text-gray-600 dark:text-gray-400'
                     }`}
                 >
                   Macho (Controle)
@@ -261,7 +263,7 @@ export function RegisterCalfModal({
           </View>
 
           {/* Raça com chips sugeridos */}
-          <View className="gap-1.5">
+          <View className="gap-1.5 mt-2">
             <CampoTexto
               rotulo="Raça *"
               valor={raca}
@@ -274,14 +276,14 @@ export function RegisterCalfModal({
                   key={item}
                   onPress={() => setRaca(item)}
                   className={`px-3 py-1.5 rounded-full border ${raca === item
-                      ? 'bg-pasto-700 border-pasto-700'
-                      : 'bg-gray-100 border-gray-200 dark:bg-slate-800 dark:border-slate-700'
+                    ? 'bg-pasto-700 border-pasto-700'
+                    : 'bg-gray-100 border-gray-200 dark:bg-slate-800 dark:border-slate-700'
                     }`}
                 >
                   <Text
                     className={`text-xs font-bold ${raca === item
-                        ? 'text-white'
-                        : 'text-gray-700 dark:text-gray-300'
+                      ? 'text-white'
+                      : 'text-gray-700 dark:text-gray-300'
                       }`}
                   >
                     {item}
@@ -292,7 +294,7 @@ export function RegisterCalfModal({
           </View>
 
           {/* Data de Nascimento & Peso Inicial */}
-          <View className="flex-row gap-3">
+          <View className="flex-row gap-3 mt-2">
             <View className="flex-1">
               <SelectDate
                 rotulo="Nascimento *"
@@ -311,9 +313,9 @@ export function RegisterCalfModal({
           </View>
 
           {/* Seção Genealogia em 3 Níveis */}
-          <View className="rounded-xl border border-dashed border-gray-300 dark:border-slate-700 p-3.5 gap-3 bg-gray-50/50 dark:bg-slate-900/40">
-            <Text className="text-xs font-bold uppercase tracking-wider text-pasto-800 dark:text-pasto-400">
-              Genealogia em 3 Níveis
+          <View className="mt-2 mb-2 rounded-xl border border-dashed border-gray-300 dark:border-slate-700 p-3.5 gap-3 bg-gray-50/50 dark:bg-slate-900/40">
+            <Text className="text-sm font-bold uppercase tracking-wider text-pasto-800 dark:text-pasto-400">
+              <Icon icon={Dna} size="sm" className="text-pasto-700 dark:text-pasto-300" decorative /> Genealogia em 3 Níveis
             </Text>
 
             {/* Pai (Touro IA) */}
@@ -327,8 +329,8 @@ export function RegisterCalfModal({
               >
                 <Text
                   className={`text-sm ${touroSelecionado
-                      ? 'font-bold text-gray-900 dark:text-slate-100'
-                      : 'text-gray-400'
+                    ? 'font-bold text-gray-900 dark:text-slate-100'
+                    : 'text-gray-400'
                     }`}
                 >
                   {touroSelecionado ? touroSelecionado.name : 'Selecionar touro do catálogo'}
@@ -355,8 +357,8 @@ export function RegisterCalfModal({
               >
                 <Text
                   className={`text-sm ${vacaSelecionada
-                      ? 'font-bold text-gray-900 dark:text-slate-100'
-                      : 'text-gray-400'
+                    ? 'font-bold text-gray-900 dark:text-slate-100'
+                    : 'text-gray-400'
                     }`}
                 >
                   {vacaSelecionada
@@ -391,30 +393,30 @@ export function RegisterCalfModal({
             placeholder="Anotações de parto, vigor do bezerro..."
           />
         </ScrollView>
+
+        {/* Modal seletor de Touros */}
+        <SeletorItemModal
+          visivel={seletorTouroAberto}
+          onFechar={() => setSeletorTouroAberto(false)}
+          onSelecionar={handleSelecionarTouro}
+          tituloModal="Selecionar Touro (Pai)"
+          placeholderBusca="Buscar por nome ou raça..."
+          itens={itensTouros}
+          itemSelecionadoId={touroSelecionado?.id}
+        />
+
+        {/* Modal seletor de Vacas */}
+        <SeletorItemModal
+          visivel={seletorVacaAberto}
+          onFechar={() => setSeletorVacaAberto(false)}
+          onSelecionar={handleSelecionarVaca}
+          tituloModal="Selecionar Vaca Mãe"
+          placeholderBusca="Buscar por brinco ou nome..."
+          tipoTeclado="numeric"
+          itens={itensVacas}
+          itemSelecionadoId={vacaSelecionada?.id}
+        />
       </ModalPadrao>
-
-      {/* Modal seletor de Touros */}
-      <SeletorItemModal
-        visivel={seletorTouroAberto}
-        onFechar={() => setSeletorTouroAberto(false)}
-        onSelecionar={handleSelecionarTouro}
-        tituloModal="Selecionar Touro (Pai)"
-        placeholderBusca="Buscar por nome ou raça..."
-        itens={itensTouros}
-        itemSelecionadoId={touroSelecionado?.id}
-      />
-
-      {/* Modal seletor de Vacas */}
-      <SeletorItemModal
-        visivel={seletorVacaAberto}
-        onFechar={() => setSeletorVacaAberto(false)}
-        onSelecionar={handleSelecionarVaca}
-        tituloModal="Selecionar Vaca Mãe"
-        placeholderBusca="Buscar por brinco ou nome..."
-        tipoTeclado="numeric"
-        itens={itensVacas}
-        itemSelecionadoId={vacaSelecionada?.id}
-      />
     </>
   );
 }

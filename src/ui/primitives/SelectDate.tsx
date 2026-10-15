@@ -1,5 +1,3 @@
-import { DatePicker, Host } from '@expo/ui/swift-ui';
-import { datePickerStyle, tint } from '@expo/ui/swift-ui/modifiers';
 import { Calendar as CalendarIcon } from 'lucide-react-native';
 import { useMemo, useState } from 'react';
 import {
@@ -7,7 +5,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { ModalPadrao } from '../overlays/ModalPadrao';
+import { NativeDatePicker } from './NativeDatePicker';
 import { useTheme } from '../theme';
 import { hapticFeedback } from '../feedback/haptics';
 
@@ -73,8 +71,8 @@ export function SelectDate({
       const mes = String(date.getMonth() + 1).padStart(2, '0');
       const dia = String(date.getDate()).padStart(2, '0');
       onChange(`${ano}-${mes}-${dia}`);
-      setModalAberto(false);
     }
+    setModalAberto(false);
   };
 
   return (
@@ -105,25 +103,15 @@ export function SelectDate({
         <CalendarIcon size={20} color={scheme === 'dark' ? '#52b788' : '#2d6a4f'} />
       </Pressable>
 
-      {/* Modal com DatePicker Graphical */}
-      <ModalPadrao
+      {/* Seletor nativo por plataforma (iOS: SwiftUI, Android: Material 3, web: input date) */}
+      <NativeDatePicker
         visivel={modalAberto}
         onFechar={() => setModalAberto(false)}
-        larguraMaxima="max-w-sm"
-        mostrarBotaoFechar={false}
-      >
-        <View className="h-80 w-full overflow-hidden my-2">
-          <Host style={{ flex: 1 }} colorScheme={scheme} seedColor="#1b4332">
-            <DatePicker
-              modifiers={[datePickerStyle('graphical'), tint('#1b4332')]}
-              title={title}
-              selection={selectedDate}
-              displayedComponents={['date']}
-              onDateChange={handleDateSelected}
-            />
-          </Host>
-        </View>
-      </ModalPadrao>
+        dataSelecionada={selectedDate}
+        onSelecionar={handleDateSelected}
+        title={title}
+        scheme={scheme}
+      />
     </View>
   );
 }

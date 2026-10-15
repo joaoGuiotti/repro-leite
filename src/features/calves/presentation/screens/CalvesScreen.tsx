@@ -1,20 +1,3 @@
-import React, { useState } from 'react';
-import {
-  FlatList,
-  RefreshControl,
-  Text,
-  TouchableOpacity,
-  useWindowDimensions,
-  View,
-} from 'react-native';
-import {
-  Plus,
-  Search,
-  ArrowLeft,
-  Milk,
-  Baby,
-  TrendingUp,
-} from 'lucide-react-native';
 import {
   Botao,
   CampoTexto,
@@ -24,13 +7,30 @@ import {
   ListLoadingState,
   Screen,
 } from '@/ui';
-import { useCalvesList } from '../hooks/useCalvesList';
-import { CalfListCard } from '../components/CalfListCard';
-import { CalfDetailPane } from '../components/CalfDetailPane';
-import { RegisterCalfModal } from '../components/RegisterCalfModal';
-import { AddWeighingModal } from '../components/AddWeighingModal';
 import { DEFAULT_FARM_ID } from '@core/db';
+import {
+  ArrowLeft,
+  Baby,
+  Milk,
+  Plus,
+  Search,
+  TrendingUp,
+} from 'lucide-react-native';
+import { useState } from 'react';
+import {
+  FlatList,
+  RefreshControl,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { CalvesUseCases } from '../../factory';
+import { AddWeighingModal } from '../components/AddWeighingModal';
+import { CalfDetailPane } from '../components/CalfDetailPane';
+import { CalfListCard } from '../components/CalfListCard';
+import { RegisterCalfModal } from '../components/RegisterCalfModal';
+import { useCalvesList } from '../hooks/useCalvesList';
 
 export interface CalvesScreenProps {
   farmId?: string;
@@ -105,7 +105,7 @@ export function CalvesScreen({ farmId = DEFAULT_FARM_ID, useCases }: CalvesScree
           {/* Botão de Ação Primária de 56px */}
           <View className="w-full sm:w-auto">
             <Botao
-              titulo="+ Cadastrar Nova Bezerra"
+              titulo="Cadastrar Nova Bezerra"
               principal
               variante="primario"
               icone={<Icon icon={Plus} size="md" className="text-white" decorative />}
@@ -174,18 +174,16 @@ export function CalvesScreen({ farmId = DEFAULT_FARM_ID, useCases }: CalvesScree
                 <TouchableOpacity
                   key={f.id}
                   onPress={() => setSexFilter(f.id)}
-                  className={`flex-1 py-1.5 rounded-lg items-center justify-center ${
-                    sexFilter === f.id
+                  className={`flex-1 py-1.5 rounded-lg items-center justify-center ${sexFilter === f.id
                       ? 'bg-white dark:bg-slate-900 shadow-2xs'
                       : ''
-                  }`}
+                    }`}
                 >
                   <Text
-                    className={`text-xs font-bold ${
-                      sexFilter === f.id
+                    className={`text-xs font-bold ${sexFilter === f.id
                         ? 'text-pasto-900 dark:text-pasto-200'
                         : 'text-gray-500 dark:text-gray-400'
-                    }`}
+                      }`}
                   >
                     {f.label}
                   </Text>
@@ -295,18 +293,16 @@ export function CalvesScreen({ farmId = DEFAULT_FARM_ID, useCases }: CalvesScree
                   <TouchableOpacity
                     key={f.id}
                     onPress={() => setSexFilter(f.id)}
-                    className={`flex-1 py-1.5 rounded-lg items-center justify-center ${
-                      sexFilter === f.id
+                    className={`flex-1 py-1.5 rounded-lg items-center justify-center ${sexFilter === f.id
                         ? 'bg-white dark:bg-slate-900 shadow-2xs'
                         : ''
-                    }`}
+                      }`}
                   >
                     <Text
-                      className={`text-xs font-bold ${
-                        sexFilter === f.id
+                      className={`text-xs font-bold ${sexFilter === f.id
                           ? 'text-pasto-900 dark:text-pasto-200'
                           : 'text-gray-500 dark:text-gray-400'
-                      }`}
+                        }`}
                     >
                       {f.label}
                     </Text>
