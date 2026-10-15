@@ -11,6 +11,7 @@ export interface FarmParameters {
   pregnancyCheckDays: number;
   gestationDays: number;
   dryOffDays: number;
+  heiferBreedingWeightKg: number;
 }
 
 export const DEFAULT_FARM_PARAMETERS: FarmParameters = {
@@ -18,6 +19,7 @@ export const DEFAULT_FARM_PARAMETERS: FarmParameters = {
   pregnancyCheckDays: 45,
   gestationDays: 282,
   dryOffDays: 60,
+  heiferBreedingWeightKg: 360,
 };
 
 export function parseFarmParameters(settingsMap: Record<string, string>): FarmParameters {
@@ -34,5 +36,8 @@ export function parseFarmParameters(settingsMap: Record<string, string>): FarmPa
     dryOffDays:
       parseInt(settingsMap['dry_off_days'] || '', 10) ||
       DEFAULT_FARM_PARAMETERS.dryOffDays,
+    heiferBreedingWeightKg:
+      parseInt(settingsMap['heifer_breeding_weight_kg'] || '', 10) ||
+      DEFAULT_FARM_PARAMETERS.heiferBreedingWeightKg,
   };
 }

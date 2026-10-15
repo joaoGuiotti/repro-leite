@@ -69,11 +69,34 @@ export function useSettings(
     return false;
   };
 
+  const saveParameters = async (newParams: FarmParameters): Promise<boolean> => {
+    try {
+      const updates = [
+        updateUseCase.execute(farmId, 'heat_window_days', String(newParams.heatWindowDays)),
+        updateUseCase.execute(farmId, 'pregnancy_check_days', String(newParams.pregnancyCheckDays)),
+        updateUseCase.execute(farmId, 'gestation_days', String(newParams.gestationDays)),
+        updateUseCase.execute(farmId, 'dry_off_days', String(newParams.dryOffDays)),
+        updateUseCase.execute(farmId, 'heifer_breeding_weight_kg', String(newParams.heiferBreedingWeightKg)),
+      ];
+
+      const results = await Promise.all(updates);
+      const allOk = results.every((r) => r.ok);
+      if (allOk) {
+        await refresh();
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  };
+
   return {
     parameters,
     loading,
     error,
     refresh,
     updateParameter,
+    saveParameters,
   };
 }
