@@ -1,8 +1,7 @@
-import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
-import { Scale, TrendingUp, Plus, Syringe, Sparkles } from 'lucide-react-native';
-import { useRouter } from 'expo-router';
 import { Botao, Icon } from '@/ui';
+import { useRouter } from 'expo-router';
+import { Plus, Scale, Sparkles, Syringe, TrendingUp } from 'lucide-react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { GrowthMetrics, WeighingRecord } from '../../domain/calves.types';
 
 export interface CalfWeightGrowthCardProps {
@@ -69,7 +68,7 @@ export function CalfWeightGrowthCard({
         >
           <Icon icon={Plus} size="sm" className="text-pasto-900 dark:text-pasto-200" decorative />
           <Text className="text-xs font-bold text-pasto-900 dark:text-pasto-200">
-            + Adicionar Pesagem
+            Adicionar Pesagem
           </Text>
         </TouchableOpacity>
       </View>
@@ -201,11 +200,10 @@ export function CalfWeightGrowthCard({
           weighingsHistory.map((item, idx) => (
             <View
               key={item.id}
-              className={`flex-row items-center py-2.5 px-3 ${
-                idx !== weighingsHistory.length - 1
-                  ? 'border-b border-gray-100 dark:border-slate-800/60'
-                  : ''
-              }`}
+              className={`flex-row items-center py-2.5 px-3 ${idx !== weighingsHistory.length - 1
+                ? 'border-b border-gray-100 dark:border-slate-800/60'
+                : ''
+                }`}
             >
               <Text className="w-24 text-xs font-semibold text-gray-900 dark:text-gray-100">
                 {formatDateBr(item.date)}

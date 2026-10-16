@@ -51,16 +51,70 @@ export class ExpoFileShareService implements FileShareService {
         return null;
       }
 
-      const fileUri = result.assets[0].uri;
-      const content = await FileSystem.readAsStringAsync(fileUri, {
-        encoding: FileSystem.EncodingType.UTF8,
-      });
-
-      return content;
+      const asset = result.assets[0];
+      return await this.readAssetContent(asset);
     } catch (error) {
       console.error('[ExpoFileShareService] Erro ao selecionar arquivo:', error);
       throw error;
     }
+  }
+
+  private async readAssetContent(asset: DocumentPicker.DocumentPickerAsset): Promise<string> {
+    const fileUri = asset.uri;
+
+    // 1. Tentar ler diretamente pelo objeto File nativo se presente (ex: Web)
+    if (asset.file && typeof (asset.file as any).text === 'function') {
+      try {
+        const text = await (asset.file as any).text();
+        if (text && typeof text === 'string') {
+          return text;
+        }
+      } catch {
+        // Prossegue para os outros métodos
+      }
+    }
+
+    // 2. Tentar ler via fetch (no React Native, fetch suporta esquemas file:// e content:// via Android ContentResolver)
+    try {
+      const response = await fetch(fileUri);
+      const text = await response.text();
+      if (text && typeof text === 'string' && text.trim().length > 0) {
+        return text;
+      }
+    } catch {
+      // Falha esperada em alguns ambientes, tenta via FileSystem
+    }
+
+    // 3. Tentar ler via FileSystem.readAsStringAsync
+    try {
+      const content = await FileSystem.readAsStringAsync(fileUri, {
+        encoding: FileSystem.EncodingType.UTF8,
+      });
+      if (content && typeof content === 'string') {
+        return content;
+      }
+    } catch (fsError) {
+      console.warn('[ExpoFileShareService] Falha ao ler via readAsStringAsync direto:', fsError);
+    }
+
+    // 4. Se o URI tiver prefixo file://, tentar sem ele caso FileSystem reclame de URL inválida
+    if (fileUri.startsWith('file://')) {
+      try {
+        const rawPath = fileUri.replace('file://', '');
+        const content = await FileSystem.readAsStringAsync(rawPath, {
+          encoding: FileSystem.EncodingType.UTF8,
+        });
+        if (content) {
+          return content;
+        }
+      } catch {
+        // Ignora
+      }
+    }
+
+    throw new Error(
+      'Não foi possível ler o arquivo selecionado. Verifique se o arquivo é válido e tente novamente.'
+    );
   }
 
   async copyToClipboard(text: string): Promise<void> {

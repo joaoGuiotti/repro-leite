@@ -2,8 +2,17 @@ import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 
 export type NetworkStatusListener = (isOnline: boolean) => void;
 
+export interface NetworkStateSnapshot {
+  isConnected: boolean | null;
+  isInternetReachable: boolean | null;
+  type: string;
+}
+
 export class NetworkMonitor {
   private _isOnline: boolean = true;
+  private _isConnected: boolean | null = true;
+  private _isInternetReachable: boolean | null = true;
+  private _connectionType: string = 'unknown';
   private _isSimulatedOffline: boolean = false;
   private _listeners: Set<NetworkStatusListener> = new Set();
   private _unsubscribeNetInfo: (() => void) | null = null;
@@ -16,27 +25,61 @@ export class NetworkMonitor {
     try {
       if (NetInfo && typeof NetInfo.addEventListener === 'function') {
         this._unsubscribeNetInfo = NetInfo.addEventListener((state: NetInfoState) => {
-          const online = Boolean(state.isConnected && (state.isInternetReachable ?? true));
-          this.updateRealNetworkStatus(online);
+          this.updateFromNetInfoState(state);
         });
 
         // Verificação inicial
         if (typeof NetInfo.fetch === 'function') {
-          NetInfo.fetch().then((state: NetInfoState) => {
-            const online = Boolean(state.isConnected && (state.isInternetReachable ?? true));
-            this.updateRealNetworkStatus(online);
-          }).catch(() => {
-            // Em caso de falha de consulta, presume online por padrão
-          });
+          NetInfo.fetch()
+            .then((state: NetInfoState) => {
+              this.updateFromNetInfoState(state);
+            })
+            .catch(() => {
+              // Em caso de falha de consulta, presume online por padrão
+            });
         }
       }
     } catch {
       // Ambiente Node / mock sem NetInfo
       this._isOnline = true;
+      this._isConnected = true;
+      this._isInternetReachable = true;
+      this._connectionType = 'unknown';
     }
   }
 
-  private updateRealNetworkStatus(online: boolean): void {
+  private updateFromNetInfoState(state: NetInfoState): void {
+    this._connectionType = state.type ?? 'unknown';
+    this._isConnected = state.isConnected ?? false;
+    this._isInternetReachable = state.isInternetReachable ?? null;
+
+    // Conectividade real funcional: deve estar conectado e não ter falha explícita de internet
+    const online = Boolean(state.isConnected && state.isInternetReachable !== false);
+    this.updateRealNetworkStatus(online);
+  }
+
+  /**
+   * Atualiza o estado da rede com base em informações recebidas (ex: via useNetInfo hook)
+   */
+  updateNetworkState(state: Partial<NetworkStateSnapshot>): void {
+    if (state.type !== undefined) {
+      this._connectionType = state.type;
+    }
+    if (state.isConnected !== undefined) {
+      this._isConnected = state.isConnected;
+    }
+    if (state.isInternetReachable !== undefined) {
+      this._isInternetReachable = state.isInternetReachable;
+    }
+
+    const online = Boolean(this._isConnected && this._isInternetReachable !== false);
+    this.updateRealNetworkStatus(online);
+  }
+
+  /**
+   * Atualiza o status booleano de rede física real.
+   */
+  updateRealNetworkStatus(online: boolean): void {
     if (this._isOnline !== online) {
       this._isOnline = online;
       if (!this._isSimulatedOffline) {
@@ -53,6 +96,27 @@ export class NetworkMonitor {
       return false;
     }
     return this._isOnline;
+  }
+
+  /**
+   * Retorna o tipo atual de interface de rede ('wifi', 'cellular', 'none', etc.)
+   */
+  getConnectionType(): string {
+    return this._connectionType;
+  }
+
+  /**
+   * Retorna se a interface de rede está fisicamente conectada
+   */
+  isConnected(): boolean | null {
+    return this._isConnected;
+  }
+
+  /**
+   * Retorna se a internet é realmente navegável
+   */
+  isInternetReachable(): boolean | null {
+    return this._isInternetReachable;
   }
 
   /**

@@ -1,119 +1,325 @@
+import { Icon } from '@/ui';
+import { useFarm } from '@core/farm';
 import { useSyncStatus } from '@core/sync';
-import { AlertCircle, CloudOff, RefreshCw, ShieldCheck } from 'lucide-react-native';
-import { Pressable, Switch, Text, View } from 'react-native';
-import { CabecalhoDataSimulador } from './CabecalhoDataSimulador';
+import { useRouter } from 'expo-router';
+import {
+  AlertCircle,
+  Calendar,
+  CloudOff,
+  Pencil,
+  RefreshCw,
+  ShieldCheck,
+  User,
+  Wifi,
+  WifiOff,
+} from 'lucide-react-native';
+import { useState } from 'react';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import { DateSelectionModal } from './CabecalhoDataSimulador';
+import { useManagementDate } from './ManagementDateContext';
+import { formatToDisplay } from './date-simulation';
 
 export interface CabecalhoStatusSimuladorProps {
   compact?: boolean;
 }
 
 export function CabecalhoStatusSimulador({ compact = false }: CabecalhoStatusSimuladorProps) {
+  const router = useRouter();
   const {
     state,
     pendingCount,
     lastSyncedDescription,
     isSimulatedOffline,
+    isOnline,
+    userEmail,
     toggleSimulatedOffline,
     triggerSyncNow,
   } = useSyncStatus();
 
-  // Cores e ícones por estado
-  const statusBadgeStyle = {
+  // Conectividade efetiva: requer conexão de rede física E modo simulado inativo
+  const isConnected = isOnline && !isSimulatedOffline;
+
+  const { activeDateString, isSimulated } = useManagementDate();
+  const { farmName, updateFarmName } = useFarm();
+
+  const [dateModalVisible, setDateModalVisible] = useState(false);
+  const [editFarmModalVisible, setEditFarmModalVisible] = useState(false);
+  const [tempFarmName, setTempFarmName] = useState(farmName);
+  const [isSavingFarm, setIsSavingFarm] = useState(false);
+
+  // Status visual para a barra de sincronismo
+  const syncStatusConfig = {
     protected: {
-      bg: 'bg-pasto-100 dark:bg-pasto-950/60',
-      text: 'text-pasto-900 dark:text-pasto-200',
-      icon: <ShieldCheck size={14} color="#1b4332" className="dark:text-pasto-300" />,
-      label: 'Nuvem Protegida',
-    },
-    pending: {
-      bg: 'bg-ambar-100 dark:bg-amber-950/60',
-      text: 'text-ambar-700 dark:text-amber-300',
-      icon: <CloudOff size={14} color="#8a5a00" className="dark:text-amber-400" />,
-      label: `${pendingCount} pendente${pendingCount > 1 ? 's' : ''}`,
+      icon: <ShieldCheck size={14} color="#34d399" />,
+      title: 'Nuvem Protegida',
+      subtitle: lastSyncedDescription.replace(/^Nuvem Protegida\s*·?\s*/, '') || 'Sincronizado agora',
+      textColor: 'text-[#34d399] dark:text-emerald-400',
     },
     syncing: {
-      bg: 'bg-blue-100 dark:bg-blue-950/60',
-      text: 'text-blue-800 dark:text-blue-300',
-      icon: <RefreshCw size={14} color="#1e40af" className="dark:text-blue-400" />,
-      label: 'Sincronizando...',
+      icon: <RefreshCw size={14} color="#60a5fa" />,
+      title: 'Sincronizando',
+      subtitle: 'Enviando dados...',
+      textColor: 'text-blue-300 dark:text-blue-400',
+    },
+    pending: {
+      icon: <CloudOff size={14} color="#fbbf24" />,
+      title: `${pendingCount} pendente${pendingCount > 1 ? 's' : ''}`,
+      subtitle: 'Modo Curral',
+      textColor: 'text-amber-300 dark:text-amber-400',
     },
     offline: {
-      bg: 'bg-gray-200 dark:bg-slate-800',
-      text: 'text-gray-700 dark:text-slate-300',
-      icon: <CloudOff size={14} color="#4b5563" className="dark:text-slate-400" />,
-      label: 'Curral Offline',
+      icon: <CloudOff size={14} color="#94a3b8" />,
+      title: 'Curral Offline',
+      subtitle: isSimulatedOffline ? 'Simulado' : 'Sem sinal de rede',
+      textColor: 'text-amber-300 dark:text-amber-400',
     },
     error: {
-      bg: 'bg-alerta-100 dark:bg-red-950/60',
-      text: 'text-alerta-700 dark:text-red-300',
-      icon: <AlertCircle size={14} color="#9b1c1c" className="dark:text-red-400" />,
-      label: 'Sem Conexão',
+      icon: <AlertCircle size={14} color="#f87171" />,
+      title: 'Sem Conexão',
+      subtitle: 'Falha no envio',
+      textColor: 'text-red-300 dark:text-red-400',
     },
   }[state];
 
+  const handleOpenEditFarm = () => {
+    setTempFarmName(farmName);
+    setEditFarmModalVisible(true);
+  };
+
+  const handleSaveFarm = async () => {
+    if (!tempFarmName.trim()) return;
+    setIsSavingFarm(true);
+    try {
+      await updateFarmName(tempFarmName.trim());
+      setEditFarmModalVisible(false);
+    } finally {
+      setIsSavingFarm(false);
+    }
+  };
+
+  const handleUserPress = () => {
+    try {
+      router.push('/(tabs)/ajustes' as any);
+    } catch {
+      // Fallback silencioso
+    }
+  };
+
   return (
-    <View className="bg-pasto-50 dark:bg-slate-900 shadow-sm">
-      {/* 1. Barra de Data de Manejo e Simulador */}
-      <CabecalhoDataSimulador />
+    <View className="bg-[#062417] dark:bg-slate-950 shadow-sm">
+      {/* 1. BARRA SUPERIOR: Sincronismo, Alternador de Internet e Perfil (Linha Única) */}
+      <View className="flex-row items-center justify-between border-b border-[#0d3b24] dark:border-slate-800 px-3.5 py-1.5 bg-[#062316] dark:bg-slate-950">
+        {/* Lado Esquerdo: Status da Nuvem + Sincronizar Agora */}
+        <View className="flex-row items-center flex-1 mr-2">
+          {syncStatusConfig.icon}
+          <Text className={`text-xs font-bold ml-1.5 ${syncStatusConfig.textColor}`}>
+            {syncStatusConfig.title}
+          </Text>
+          <Text className="text-xs text-slate-400 dark:text-slate-500 ml-1.5" numberOfLines={1}>
+            · {syncStatusConfig.subtitle}
+          </Text>
 
-      {/* 2. Barra de Proteção e Sincronização */}
-      <View className="flex-row flex-wrap items-center justify-between border-b border-gray-200 dark:border-slate-800 px-4 py-2">
-        {/* Selo de Estado com Ícone Lucide */}
-        <View className="flex-row items-center gap-2">
-          <View className={`flex-row items-center gap-1.5 rounded-full px-2.5 py-1 ${statusBadgeStyle.bg}`}>
-            {statusBadgeStyle.icon}
-            <Text className={`text-xs font-bold ${statusBadgeStyle.text}`}>
-              {statusBadgeStyle.label}
-            </Text>
-          </View>
-
-          {!compact && (
-            <Text className="text-xs text-gray-500 dark:text-gray-400 max-w-[160px]" numberOfLines={1}>
-              {lastSyncedDescription}
-            </Text>
-          )}
-        </View>
-
-        {/* Controles de Ação de Campo */}
-        <View className="flex-row items-center gap-3">
-          {/* Botão Sincronizar Agora */}
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Sincronizar agora"
-            disabled={isSimulatedOffline || state === 'syncing'}
-            onPress={triggerSyncNow}
-            className={`flex-row items-center gap-1.5 rounded-lg px-2.5 py-1 ${isSimulatedOffline || state === 'syncing'
-              ? 'bg-gray-100 dark:bg-slate-800 opacity-50'
-              : 'bg-pasto-900 active:bg-pasto-700 dark:bg-pasto-700 dark:active:bg-pasto-600'
-              }`}
+            disabled={!isConnected || state === 'syncing'}
+            onPress={() => triggerSyncNow()}
+            className="ml-2.5 active:opacity-70"
           >
-            <RefreshCw
-              size={12}
-              color={isSimulatedOffline || state === 'syncing' ? '#94a3b8' : '#ffffff'}
-            />
             <Text
-              className={`text-xs font-bold ${isSimulatedOffline || state === 'syncing' ? 'text-gray-400 dark:text-slate-500' : 'text-white'
+              className={`text-xs font-black tracking-wider ${!isConnected || state === 'syncing'
+                ? 'text-slate-500 line-through'
+                : 'text-[#34d399] underline'
                 }`}
             >
-              {state === 'syncing' ? 'Enviando...' : 'Sincronizar'}
+              SINCRONIZAR
             </Text>
           </Pressable>
+        </View>
 
-          {/* Alternador de Modo Curral (Offline Simulado) */}
-          <View className="flex-row items-center gap-1">
-            <Text className="text-[10px] font-semibold uppercase text-gray-400 dark:text-slate-500">
-              {isSimulatedOffline ? 'Offline' : 'Online'}
-            </Text>
-            <Switch
-              value={!isSimulatedOffline}
-              onValueChange={toggleSimulatedOffline}
-              trackColor={{ false: '#e2e8f0', true: '#2d6a4f' }}
-              thumbColor={isSimulatedOffline ? '#94a3b8' : '#ffffff'}
-              style={{ transform: [{ scaleX: 0.75 }, { scaleY: 0.75 }] }}
-            />
-          </View>
+        {/* Lado Direito: Ícone Internet (ON / OFF) + Ícone de Usuário */}
+        <View className="flex-row items-center gap-1.5">
+          {/* Botão de Conexão/Internet (ON / OFF) */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={!isConnected ? 'Internet Offline (OFF)' : 'Internet Conectada (ON)'}
+            onPress={() => {
+              if (!isOnline && !isSimulatedOffline) {
+                Alert.alert(
+                  'Curral Offline',
+                  'Seu aparelho está desconectado da internet (Status: OFF).\n\nO ReproLeite continua operando normalmente em modo offline e todos os seus manejos estão protegidos no banco de dados local.'
+                );
+              } else {
+                toggleSimulatedOffline();
+              }
+            }}
+            className={`px-2 py-1 rounded-lg border active:opacity-75 ${!isConnected
+              ? 'bg-amber-950/80 border-amber-700/60'
+              : 'bg-[#093a23] dark:bg-slate-800 border-[#14532d] dark:border-slate-700'
+              }`}
+          >
+            {!isConnected ? (
+              <View className="flex-row items-center gap-1">
+                <WifiOff size={13} color="#fbbf24" />
+              </View>
+            ) : (
+              <View className="flex-row items-center gap-1">
+                <Wifi size={13} color="#34d399" />
+              </View>
+            )}
+          </Pressable>
+
+          <Text className="text-slate-600 dark:text-slate-600 text-xs">|</Text>
+
+          {/* Usuário (Apenas Ícone de Perfil) */}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={userEmail ? `Conta conectada: ${userEmail}` : 'Entrar na conta'}
+            onPress={handleUserPress}
+            className="p-1.5 rounded-lg active:opacity-75 relative"
+          >
+            <User size={15} color={userEmail ? '#34d399' : '#94a3b8'} />
+            {userEmail && (
+              <View className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            )}
+          </Pressable>
         </View>
       </View>
+
+      {/* 2. BARRA PRINCIPAL: Logo, Fazenda e Seletor de Data */}
+      <View className="flex-row items-center justify-between px-4 py-2.5 bg-[#0a3721] dark:bg-slate-900 border-b border-[#062416] dark:border-slate-800">
+        {/* Identidade ReproLeite + Nome da Fazenda */}
+        <View className="flex-row items-center flex-1 mr-3">
+          <View className="w-10 h-10 rounded-2xl bg-[#062416] dark:bg-slate-950 border border-[#165534] dark:border-slate-800 items-center justify-center mr-3 shadow-inner">
+            <Text className="text-xl">🐄</Text>
+          </View>
+
+          <View className="flex-1">
+            <View className="flex-row items-center">
+              <Text className="text-base font-extrabold text-white tracking-tight">
+                ReproLeite
+              </Text>
+            </View>
+
+            {/* Nome da Fazenda Editável */}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Editar nome da fazenda"
+              onPress={handleOpenEditFarm}
+              className="flex-row items-center gap-1.5 mt-0.5 active:opacity-75"
+            >
+              <Text
+                className="text-xs font-semibold text-[#a7f3d0] dark:text-emerald-300 max-w-[160px]"
+                numberOfLines={1}
+              >
+                {farmName}
+              </Text>
+              <Icon icon={Pencil} size="xs" className="text-gray-200 dark:text-gray-300" decorative />
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Pílula de Data de Manejo */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Abrir controle de data de manejo"
+          onPress={() => setDateModalVisible(true)}
+          className={`rounded-xl px-3 py-1.5 flex-row items-center gap-2 border shadow-sm active:bg-[#072c1a] ${isSimulated
+            ? 'bg-[#062817] border-[#d97706]'
+            : 'bg-[#062817] dark:bg-slate-950 border-[#165534] dark:border-slate-700'
+            }`}
+        >
+          <Calendar size={15} color={isSimulated ? '#fbbf24' : '#34d399'} />
+          <Text className="text-sm font-bold text-amber-100 tracking-wide">
+            {formatToDisplay(activeDateString)}
+          </Text>
+        </Pressable>
+      </View>
+
+      {/* Modal de Seleção de Data */}
+      <DateSelectionModal
+        visible={dateModalVisible}
+        onClose={() => setDateModalVisible(false)}
+      />
+
+      {/* Modal de Edição de Nome da Fazenda */}
+      <Modal
+        visible={editFarmModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setEditFarmModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          className="flex-1 bg-black/60 items-center justify-center p-4"
+        >
+          <Pressable
+            className="absolute inset-0"
+            onPress={() => setEditFarmModalVisible(false)}
+          />
+
+          <View className="w-full max-w-[360px] bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-2xl border border-slate-100 dark:border-slate-800 z-10">
+            <View className="flex-row items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <Text className="text-xl">🏡</Text>
+              <Text className="text-base font-extrabold text-slate-900 dark:text-slate-100">
+                Nome da Fazenda
+              </Text>
+            </View>
+
+            <Text className="text-xs text-slate-500 dark:text-slate-400 mt-2.5 mb-4 leading-relaxed">
+              Defina o nome da sua propriedade leiteira. Este nome será sincronizado com a nuvem e exibido nos relatórios:
+            </Text>
+
+            <View className="border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 bg-white dark:bg-slate-800">
+              <TextInput
+                value={tempFarmName}
+                onChangeText={setTempFarmName}
+                placeholder="Ex: Fazenda Boa Vista"
+                placeholderTextColor="#94a3b8"
+                autoFocus
+                className="text-sm font-semibold text-slate-800 dark:text-slate-100 p-0"
+              />
+            </View>
+
+            <View className="flex-row gap-2 mt-5">
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Cancelar alteração"
+                onPress={() => setEditFarmModalVisible(false)}
+                className="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 items-center justify-center active:bg-slate-200"
+              >
+                <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                  Cancelar
+                </Text>
+              </Pressable>
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Salvar nome da fazenda"
+                disabled={isSavingFarm || !tempFarmName.trim()}
+                onPress={handleSaveFarm}
+                className={`flex-1 py-3 rounded-xl items-center justify-center ${isSavingFarm || !tempFarmName.trim()
+                  ? 'bg-slate-300 dark:bg-slate-700'
+                  : 'bg-[#064e3b] active:bg-[#065f46]'
+                  }`}
+              >
+                <Text className="text-xs font-bold text-white">
+                  {isSavingFarm ? 'Salvando...' : 'Salvar Nome'}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 }

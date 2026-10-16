@@ -1,7 +1,7 @@
-import { and, desc, eq, inArray, isNull } from 'drizzle-orm';
 import { getDatabase, getExpoDatabase } from '@core/db/client';
 import { animals } from '@core/db/schema/animals';
 import { bulls } from '@core/db/schema/bulls';
+import { and, desc, eq, inArray, isNull } from 'drizzle-orm';
 import { CalfEnrichedRow } from '../domain/calves.repository';
 import { WeighingRecord } from '../domain/calves.types';
 import { weighings } from './weighings.schema';
@@ -81,7 +81,7 @@ export async function getEnrichedCalvesList(
     })
     .from(animals)
     .where(and(...whereConditions))
-    .orderBy(desc(animals.birthDate));
+    .orderBy(desc(animals.birthDate), desc(animals.createdAt));
 
   if (calfRows.length === 0) {
     return [];

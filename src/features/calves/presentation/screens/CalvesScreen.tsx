@@ -8,6 +8,7 @@ import {
   Screen,
 } from '@/ui';
 import { DEFAULT_FARM_ID } from '@core/db';
+import { useFocusEffect } from 'expo-router';
 import {
   ArrowLeft,
   Baby,
@@ -24,7 +25,6 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { useFocusEffect } from 'expo-router';
 import { CalvesUseCases } from '../../factory';
 import { AddWeighingModal } from '../components/AddWeighingModal';
 import { CalfDetailPane } from '../components/CalfDetailPane';

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Alert, Text, View } from 'react-native';
+import { Alert, Text, View, Modal, TextInput, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
 import { i18n } from '@/i18n';
 import { Botao, Cartao, Icon, Screen, SeloStatus, hapticFeedback } from '@/ui';
 import { DEFAULT_FARM_ID } from '@core/db';
 import { useSyncStatus } from '@core/sync';
-import { Cloud, Copy, FileSpreadsheet, RotateCcw, Share2, Sliders, LogOut, UserCheck } from 'lucide-react-native';
+import { useFarm } from '@core/farm';
+import { Cloud, Copy, FileSpreadsheet, RotateCcw, Share2, Sliders, LogOut, UserCheck, Home } from 'lucide-react-native';
 import { useAccount, LoginOtpModal, InitialSyncModal } from '@features/account';
 import { getSettingsUseCases } from '../../factory';
 import { useSettings } from '../hooks/useSettings';
@@ -58,6 +59,11 @@ export function SettingsScreen({ farmId = DEFAULT_FARM_ID }: SettingsScreenProps
     initialSyncError,
     performInitialSync,
   } = useAccount();
+  const { farmName, updateFarmName } = useFarm();
+  const [farmNameModalVisible, setFarmNameModalVisible] = useState(false);
+  const [tempFarmNameInput, setTempFarmNameInput] = useState(farmName);
+  const [isSavingFarmName, setIsSavingFarmName] = useState(false);
+
   const [loginModalVisible, setLoginModalVisible] = useState(false);
 
   const isBusy = exportingWhatsApp || exportingHerdCsv || exportingCalvesCsv || copyingBackup;
@@ -242,7 +248,36 @@ export function SettingsScreen({ farmId = DEFAULT_FARM_ID }: SettingsScreenProps
         </View>
       </Cartao>
 
-      {/* 2. Conta & Sincronização em Nuvem */}
+      {/* 2. Propriedade Rural (Fazenda) */}
+      <Cartao titulo="Propriedade Rural (Fazenda)">
+        <View className="flex-row items-center justify-between pb-3 border-b border-gray-100 dark:border-slate-800">
+          <View className="flex-1 mr-3">
+            <Text className="text-xs uppercase font-bold text-gray-500 dark:text-gray-400">
+              Nome da Propriedade
+            </Text>
+            <Text className="text-base font-extrabold text-pasto-900 dark:text-pasto-100 mt-0.5">
+              {farmName}
+            </Text>
+          </View>
+          <Botao
+            titulo="Alterar Nome"
+            variante="secundario"
+            icone={<Icon icon={Home} size="sm" className="text-pasto-900 dark:text-pasto-200" decorative />}
+            onPress={() => {
+              setTempFarmNameInput(farmName);
+              setFarmNameModalVisible(true);
+            }}
+          />
+        </View>
+        <View className="pt-2.5">
+          <Text className="text-xs text-gray-400 dark:text-gray-500">Identificador da Fazenda (UUID):</Text>
+          <Text className="text-xs font-mono text-gray-600 dark:text-gray-400 mt-0.5" numberOfLines={1}>
+            {farmId}
+          </Text>
+        </View>
+      </Cartao>
+
+      {/* 3. Conta & Sincronização em Nuvem */}
       <Cartao titulo={i18n.settings.sync}>
         <View className="flex-row items-center justify-between pb-3">
           <View>
@@ -403,6 +438,86 @@ export function SettingsScreen({ farmId = DEFAULT_FARM_ID }: SettingsScreenProps
           }
         }}
       />
+
+      {/* Modal de Alteração de Nome da Fazenda */}
+      <Modal
+        visible={farmNameModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setFarmNameModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          className="flex-1 bg-black/60 items-center justify-center p-4"
+        >
+          <Pressable
+            className="absolute inset-0"
+            onPress={() => setFarmNameModalVisible(false)}
+          />
+          <View className="w-full max-w-[360px] bg-white dark:bg-slate-900 rounded-3xl p-5 shadow-2xl border border-slate-100 dark:border-slate-800 z-10">
+            <View className="flex-row items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
+              <Text className="text-xl">🏡</Text>
+              <Text className="text-base font-extrabold text-slate-900 dark:text-slate-100">
+                Nome da Fazenda
+              </Text>
+            </View>
+
+            <Text className="text-xs text-slate-500 dark:text-slate-400 mt-2.5 mb-4 leading-relaxed">
+              Defina o nome da sua propriedade leiteira para identificação no aplicativo e na sincronização com a nuvem:
+            </Text>
+
+            <View className="border border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2.5 bg-white dark:bg-slate-800">
+              <TextInput
+                value={tempFarmNameInput}
+                onChangeText={setTempFarmNameInput}
+                placeholder="Ex: Fazenda Boa Vista"
+                placeholderTextColor="#94a3b8"
+                autoFocus
+                className="text-sm font-semibold text-slate-800 dark:text-slate-100 p-0"
+              />
+            </View>
+
+            <View className="flex-row gap-2 mt-5">
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Cancelar alteração"
+                onPress={() => setFarmNameModalVisible(false)}
+                className="flex-1 py-3 rounded-xl bg-slate-100 dark:bg-slate-800 items-center justify-center active:bg-slate-200"
+              >
+                <Text className="text-xs font-bold text-slate-700 dark:text-slate-200">
+                  Cancelar
+                </Text>
+              </Pressable>
+
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Salvar nome da fazenda"
+                disabled={isSavingFarmName || !tempFarmNameInput.trim()}
+                onPress={async () => {
+                  if (!tempFarmNameInput.trim()) return;
+                  setIsSavingFarmName(true);
+                  try {
+                    await updateFarmName(tempFarmNameInput.trim());
+                    setFarmNameModalVisible(false);
+                    Alert.alert('Sucesso', 'Nome da fazenda atualizado com sucesso!');
+                  } finally {
+                    setIsSavingFarmName(false);
+                  }
+                }}
+                className={`flex-1 py-3 rounded-xl items-center justify-center ${
+                  isSavingFarmName || !tempFarmNameInput.trim()
+                    ? 'bg-slate-300 dark:bg-slate-700'
+                    : 'bg-[#064e3b] active:bg-[#065f46]'
+                }`}
+              >
+                <Text className="text-xs font-bold text-white">
+                  {isSavingFarmName ? 'Salvando...' : 'Salvar'}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </Screen>
   );
 }

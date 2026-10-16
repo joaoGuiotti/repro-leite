@@ -2,9 +2,10 @@ import { LucideIcon } from 'lucide-react-native';
 import { cssInterop } from 'nativewind';
 import { Pressable, StyleProp, View, ViewStyle } from 'react-native';
 
-export type IconSize = 'sm' | 'md' | 'lg' | 'xl' | number;
+export type IconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | number;
 
-export const ICON_SIZE_MAP: Record<'sm' | 'md' | 'lg' | 'xl', number> = {
+export const ICON_SIZE_MAP: Record<'xs' | 'sm' | 'md' | 'lg' | 'xl', number> = {
+  xs: 12,
   sm: 16,
   md: 20,
   lg: 24,

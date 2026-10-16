@@ -1,6 +1,3 @@
-import { and, desc, eq, isNull } from 'drizzle-orm';
-import { generateUUID, getDatabase } from '../client';
-import * as schema from '../schema';
 import {
   calculateReproductiveMilestones,
   resolveAnimalReproStatusAfterCancellation,
@@ -9,8 +6,11 @@ import {
   CreateInseminationDTO,
   InseminationRecord,
 } from '@/types/insemination';
-import { AlertRepository } from './alertRepository';
 import { SyncQueueRepository } from '@core/sync';
+import { and, desc, eq, isNull } from 'drizzle-orm';
+import { generateUUID, getDatabase } from '../client';
+import * as schema from '../schema';
+import { AlertRepository } from './alertRepository';
 
 export interface InseminationWithAnimalSummary extends InseminationRecord {
   animalEarTag: string;

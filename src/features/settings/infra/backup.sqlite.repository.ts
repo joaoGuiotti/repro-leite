@@ -49,6 +49,7 @@ export class BackupSqliteRepository implements BackupRepository {
       farm_id: s.farmId,
       key: s.key,
       value: s.value,
+      created_at: s.createdAt,
       updated_at: s.updatedAt,
     }));
 
@@ -173,6 +174,7 @@ export class BackupSqliteRepository implements BackupRepository {
               farmId: targetFarmId,
               key: s.key,
               value: s.value,
+              createdAt: s.created_at || s.updated_at || new Date().toISOString(),
               updatedAt: s.updated_at || new Date().toISOString(),
               deletedAt: null,
             });

@@ -1,10 +1,10 @@
-import { and, asc, eq, isNull } from 'drizzle-orm';
 import { getDatabase } from '@core/db/client';
-import { BullRepository } from '../domain/bull.repository';
-import { BullRecord } from '../domain/bull.entity';
+import { and, asc, desc, eq, isNull } from 'drizzle-orm';
 import { adjustBullStock } from '../domain/bull-stock';
-import { bulls } from './bull.schema';
+import { BullRecord } from '../domain/bull.entity';
+import { BullRepository } from '../domain/bull.repository';
 import { BullMapper } from './bull.mapper';
+import { bulls } from './bull.schema';
 
 export class BullSqliteRepository implements BullRepository {
   async listByFarm(farmId: string): Promise<BullRecord[]> {
@@ -13,7 +13,7 @@ export class BullSqliteRepository implements BullRepository {
       .select()
       .from(bulls)
       .where(and(eq(bulls.farmId, farmId), isNull(bulls.deletedAt)))
-      .orderBy(asc(bulls.name));
+      .orderBy(desc(bulls.createdAt), asc(bulls.name));
 
     return rows.map(BullMapper.toDomain);
   }

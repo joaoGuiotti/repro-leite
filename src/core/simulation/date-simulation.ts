@@ -51,3 +51,25 @@ export function formatToDisplay(dateStr: string): string {
   }
   return dateStr;
 }
+
+/**
+ * Converte data em exibição DD/MM/AAAA para YYYY-MM-DD se válida.
+ */
+export function parseFromDisplay(displayStr: string): string | null {
+  const parts = displayStr.trim().split('/');
+  if (parts.length === 3) {
+    const day = parts[0].padStart(2, '0');
+    const month = parts[1].padStart(2, '0');
+    const year = parts[2];
+    if (day.length === 2 && month.length === 2 && year.length === 4) {
+      const numDay = parseInt(day, 10);
+      const numMonth = parseInt(month, 10);
+      const numYear = parseInt(year, 10);
+      if (numMonth >= 1 && numMonth <= 12 && numDay >= 1 && numDay <= 31 && numYear >= 2000 && numYear <= 2100) {
+        return `${year}-${month}-${day}`;
+      }
+    }
+  }
+  return null;
+}
+

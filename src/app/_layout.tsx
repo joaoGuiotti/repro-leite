@@ -1,6 +1,7 @@
 import { initDatabase } from '@core/db';
 import { CabecalhoStatusSimulador, ManagementDateProvider } from '@core/simulation';
 import { SyncStatusProvider } from '@core/sync';
+import { FarmProvider } from '@core/farm';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
@@ -35,22 +36,24 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ManagementDateProvider>
         <SyncStatusProvider>
-          <SafeAreaView edges={['top']} className="flex-1 bg-white dark:bg-slate-950">
-            <StatusBar style="auto" />
-            <CabecalhoStatusSimulador />
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-            </Stack>
-            {!isDbReady && (
-              <View className="absolute inset-0 z-50 items-center justify-center bg-pasto-50 dark:bg-slate-900 p-6">
-                <ActivityIndicator size="large" color="#1b4332" />
-                <Text className="mt-4 text-base font-semibold text-pasto-900 dark:text-pasto-300">
-                  Carregando ReproLeite...
-                </Text>
-              </View>
-            )}
-          </SafeAreaView>
+          <FarmProvider>
+            <SafeAreaView edges={['top']} className="flex-1 bg-white dark:bg-slate-950">
+              <StatusBar style="auto" />
+              <CabecalhoStatusSimulador />
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="index" options={{ headerShown: false }} />
+              </Stack>
+              {!isDbReady && (
+                <View className="absolute inset-0 z-50 items-center justify-center bg-pasto-50 dark:bg-slate-900 p-6">
+                  <ActivityIndicator size="large" color="#1b4332" />
+                  <Text className="mt-4 text-base font-semibold text-pasto-900 dark:text-pasto-300">
+                    Carregando ReproLeite...
+                  </Text>
+                </View>
+              )}
+            </SafeAreaView>
+          </FarmProvider>
         </SyncStatusProvider>
       </ManagementDateProvider>
     </SafeAreaProvider>
