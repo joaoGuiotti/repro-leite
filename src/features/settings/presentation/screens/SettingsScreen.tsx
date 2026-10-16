@@ -4,7 +4,8 @@ import { i18n } from '@/i18n';
 import { Botao, Cartao, Icon, Screen, SeloStatus, hapticFeedback } from '@/ui';
 import { DEFAULT_FARM_ID } from '@core/db';
 import { useSyncStatus } from '@core/sync';
-import { Cloud, Copy, FileSpreadsheet, RotateCcw, Share2, Sliders } from 'lucide-react-native';
+import { Cloud, Copy, FileSpreadsheet, RotateCcw, Share2, Sliders, LogOut, UserCheck } from 'lucide-react-native';
+import { useAccount, LoginOtpModal, InitialSyncModal } from '@features/account';
 import { getSettingsUseCases } from '../../factory';
 import { useSettings } from '../hooks/useSettings';
 import { BackupPayload } from '../../domain/backup.types';
@@ -24,6 +25,8 @@ export function SettingsScreen({ farmId = DEFAULT_FARM_ID }: SettingsScreenProps
     lastSyncedDescription,
     triggerSyncNow,
     isSimulatedOffline,
+    clockDriftExceeded,
+    lastError,
   } = useSyncStatus();
 
   const useCases = getSettingsUseCases();
@@ -44,6 +47,18 @@ export function SettingsScreen({ farmId = DEFAULT_FARM_ID }: SettingsScreenProps
   const [restoreRawContent, setRestoreRawContent] = useState<string | null>(null);
 
   const [editModalVisible, setEditModalVisible] = useState(false);
+  const {
+    session,
+    isAuthenticated,
+    signOut,
+    initialSyncVisible,
+    initialSyncProgress,
+    initialSyncTable,
+    initialSyncTotal,
+    initialSyncError,
+    performInitialSync,
+  } = useAccount();
+  const [loginModalVisible, setLoginModalVisible] = useState(false);
 
   const isBusy = exportingWhatsApp || exportingHerdCsv || exportingCalvesCsv || copyingBackup;
 
@@ -246,6 +261,22 @@ export function SettingsScreen({ farmId = DEFAULT_FARM_ID }: SettingsScreenProps
             : 'Sincronização assíncrona automática ativa quando houver sinal de internet.'}
         </Text>
 
+        {clockDriftExceeded && (
+          <View className="bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800 rounded-xl p-3 mb-3">
+            <Text className="text-xs font-bold text-amber-800 dark:text-amber-200">Relógio do aparelho desregulado</Text>
+            <Text className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
+              A hora do seu aparelho está com mais de 5 minutos de diferença em relação à nuvem. Ajuste a data e hora para evitar erros em projeções reprodutivas.
+            </Text>
+          </View>
+        )}
+
+        {lastError && (
+          <View className="bg-red-50 dark:bg-red-950/50 border border-red-300 dark:border-red-800 rounded-xl p-3 mb-3">
+            <Text className="text-xs font-bold text-red-800 dark:text-red-200">Detalhe do Erro:</Text>
+            <Text className="text-xs text-red-700 dark:text-red-300 mt-0.5">{lastError}</Text>
+          </View>
+        )}
+
         <View className="gap-2.5">
           <Botao
             titulo={i18n.settings.forceSync}
@@ -254,11 +285,43 @@ export function SettingsScreen({ farmId = DEFAULT_FARM_ID }: SettingsScreenProps
             variante="secundario"
             desabilitado={isSimulatedOffline || state === 'syncing'}
           />
-          <Botao
-            titulo="Entrar com Conta (E-mail OTP)"
-            onPress={() => { }}
-            variante="secundario"
-          />
+          {isAuthenticated ? (
+            <View className="gap-2 border-t border-gray-100 dark:border-slate-800 pt-2.5 mt-1">
+              <View className="flex-row items-center gap-2">
+                <Icon icon={UserCheck} size="sm" className="text-pasto-700 dark:text-pasto-300" decorative />
+                <Text className="text-xs text-gray-700 dark:text-gray-300 flex-1" numberOfLines={1}>
+                  Conectado como: <Text className="font-bold">{session?.email}</Text>
+                </Text>
+              </View>
+              <Botao
+                titulo="Desconectar Conta"
+                icone={<Icon icon={LogOut} size="sm" className="text-red-700 dark:text-red-300" decorative />}
+                onPress={() => {
+                  Alert.alert(
+                    'Desconectar Conta',
+                    'Deseja realmente sair? Seus dados locais permanecerão salvos neste aparelho.',
+                    [
+                      { text: 'Cancelar', style: 'cancel' },
+                      {
+                        text: 'Sair',
+                        style: 'destructive',
+                        onPress: async () => {
+                          await signOut();
+                        },
+                      },
+                    ]
+                  );
+                }}
+                variante="secundario"
+              />
+            </View>
+          ) : (
+            <Botao
+              titulo="Entrar com Conta (E-mail OTP)"
+              onPress={() => setLoginModalVisible(true)}
+              variante="primario"
+            />
+          )}
         </View>
       </Cartao>
 
@@ -314,6 +377,31 @@ export function SettingsScreen({ farmId = DEFAULT_FARM_ID }: SettingsScreenProps
         onFechar={() => setEditModalVisible(false)}
         onSalvar={handleSaveParameters}
         parametrosAtuais={parameters}
+      />
+
+      {/* Modal de Entrada com Conta OTP */}
+      <LoginOtpModal
+        visivel={loginModalVisible}
+        onFechar={() => setLoginModalVisible(false)}
+        farmId={farmId}
+        onSucesso={() => {
+          triggerSyncNow();
+        }}
+      />
+
+      {/* Modal de Carga Inicial para Novo Aparelho */}
+      <InitialSyncModal
+        visivel={initialSyncVisible}
+        carregando={initialSyncProgress < 100 && !initialSyncError}
+        tabelaAtual={initialSyncTable}
+        progressoPercentual={initialSyncProgress}
+        totalRegistros={initialSyncTotal}
+        erro={initialSyncError}
+        onTentarNovamente={() => {
+          if (session?.farmId) {
+            void performInitialSync(session.farmId);
+          }
+        }}
       />
     </Screen>
   );

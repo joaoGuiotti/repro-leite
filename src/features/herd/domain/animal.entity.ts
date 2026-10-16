@@ -49,6 +49,7 @@ export interface AnimalRecord extends BaseEntity {
   maternalGrandsireName?: string | null;
   paternalGrandsireName?: string | null;
   notes?: string | null;
+  earTagConflict?: boolean | null;
 }
 
 export interface AnimalSummary {

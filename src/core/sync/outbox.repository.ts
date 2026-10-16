@@ -97,24 +97,30 @@ export class OutboxRepository {
   static async peekBatch(
     farmId: string,
     limit: number = 50,
-    now: Date = new Date()
+    now: Date = new Date(),
+    ignoreBackoff: boolean = false
   ): Promise<schema.SyncQueueEntry[]> {
     const db = getDatabase();
     const nowIso = now.toISOString();
 
+    const conditions = [
+      eq(schema.syncQueue.farmId, farmId),
+      inArray(schema.syncQueue.status, ['pending', 'failed', 'in_flight']),
+    ];
+
+    if (!ignoreBackoff) {
+      conditions.push(
+        or(
+          isNull(schema.syncQueue.nextRetryAt),
+          lte(schema.syncQueue.nextRetryAt, nowIso)
+        )!
+      );
+    }
+
     return db
       .select()
       .from(schema.syncQueue)
-      .where(
-        and(
-          eq(schema.syncQueue.farmId, farmId),
-          inArray(schema.syncQueue.status, ['pending', 'failed']),
-          or(
-            isNull(schema.syncQueue.nextRetryAt),
-            lte(schema.syncQueue.nextRetryAt, nowIso)
-          )
-        )
-      )
+      .where(and(...conditions))
       .orderBy(asc(schema.syncQueue.createdAt))
       .limit(limit);
   }

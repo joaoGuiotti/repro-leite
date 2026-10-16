@@ -5,8 +5,15 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
+import { configureReanimatedLogger, ReanimatedLogLevel } from 'react-native-reanimated';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import '../global.css';
+
+// Desativa o aviso de strict mode gerado pelas bibliotecas de navegação
+configureReanimatedLogger({
+  level: ReanimatedLogLevel.warn,
+  strict: false
+});
 
 export default function RootLayout() {
   const [isDbReady, setIsDbReady] = useState(false);

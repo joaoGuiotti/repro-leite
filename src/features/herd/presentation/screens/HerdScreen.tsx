@@ -279,6 +279,12 @@ export function HerdScreen({
             </View>
 
             <View className="items-end gap-1">
+              {Boolean(animal.earTagConflict) && (
+                <SeloStatus
+                  status="alerta"
+                  texto="CONFLITO DE BRINCO"
+                />
+              )}
               {inativo ? (
                 <View className="rounded-lg bg-amber-200 dark:bg-amber-900/60 border border-amber-300 dark:border-amber-800 px-2 py-0.5">
                   <Text className="text-xs font-bold text-amber-900 dark:text-amber-200 capitalize">

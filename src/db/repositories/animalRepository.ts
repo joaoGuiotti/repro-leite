@@ -22,7 +22,7 @@ export class AnimalRepository {
 
     const records = await query;
 
-    return (records as AnimalRecord[]).filter((animal) => {
+    return (records as unknown as AnimalRecord[]).filter((animal) => {
       if (!includeInactive && animal.exitStatus !== 'ativo') {
         return false;
       }
@@ -41,7 +41,7 @@ export class AnimalRepository {
       .where(and(eq(schema.animals.id, id), isNull(schema.animals.deletedAt)))
       .limit(1);
 
-    return (result[0] as AnimalRecord) ?? null;
+    return (result[0] as unknown as AnimalRecord) ?? null;
   }
 
   /**

@@ -126,4 +126,21 @@ export class ConflictResolver {
     if (val instanceof Date) return val.getTime();
     return 0;
   }
+
+  /**
+   * Identifica se um brinco recebido em sincronização conflita com outro animal ativo local.
+   */
+  static checkEarTagConflict(
+    incomingEarTag: string,
+    incomingAnimalId: string,
+    existingActiveAnimals: { id: string; earTag: string }[]
+  ): boolean {
+    if (!incomingEarTag) return false;
+    const norm = (tag: string) => tag.trim().toLowerCase();
+    const incomingNorm = norm(incomingEarTag);
+
+    return existingActiveAnimals.some(
+      (a) => a.id !== incomingAnimalId && norm(a.earTag) === incomingNorm
+    );
+  }
 }

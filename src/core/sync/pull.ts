@@ -166,16 +166,34 @@ export class PullEngine {
     recordId: string,
     data: Record<string, unknown>
   ): void {
+    let validColNames: Set<string>;
+    try {
+      const tableInfo = rawDb.getAllSync(`PRAGMA table_info(${tableName});`) as { name: string }[];
+      validColNames = new Set(tableInfo.map((c) => c.name));
+    } catch {
+      validColNames = new Set();
+    }
+
     const columns: string[] = [];
     const values: unknown[] = [];
     const placeholders: string[] = [];
 
     for (const [key, val] of Object.entries(data)) {
       const colName = this.toSnakeCase(key);
-      // Evita colunas inexistentes ou complexas
+
+      // Metadados do servidor como server_rev não existem nas tabelas do SQLite local
+      if (colName === 'server_rev') {
+        continue;
+      }
+      if (validColNames.size > 0 && !validColNames.has(colName)) {
+        continue;
+      }
+
+      // Evita colunas complexas
       if (typeof val === 'object' && val !== null && !(val instanceof Date)) {
         continue;
       }
+
       columns.push(colName);
       values.push(val ?? null);
       placeholders.push('?');

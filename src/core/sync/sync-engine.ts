@@ -2,6 +2,8 @@ import { PushEngine, PushResult } from './push';
 import { PullEngine, PullResult } from './pull';
 import { OutboxRepository } from './outbox.repository';
 import { RemoteSyncGateway, defaultRemoteGateway } from '../network/api-client';
+import { supabaseRemoteGateway } from '../network/supabase-remote-gateway';
+import { isSupabaseConfigured } from '../network/supabase-client';
 import { networkMonitor, NetworkMonitor } from '../network/network-monitor';
 import { DEFAULT_FARM_ID, getDatabase } from '@core/db/client';
 import * as schema from '@core/db/schema';
@@ -59,6 +61,22 @@ export class SyncEngine {
 
   setGateway(gateway: RemoteSyncGateway): void {
     this._gateway = gateway;
+  }
+
+  get farmId(): string {
+    return this._farmId;
+  }
+
+  setFarmId(farmId: string): void {
+    if (this._farmId !== farmId) {
+      this._farmId = farmId;
+      this.refreshPendingCount();
+      this.loadLastSuccessAt();
+    }
+  }
+
+  useSupabaseGateway(): void {
+    this.setGateway(supabaseRemoteGateway);
   }
 
   /**
@@ -146,7 +164,7 @@ export class SyncEngine {
       // 1. PUSH: Drena outbox local em lotes de até 50 itens
       let pushLoops = 0;
       do {
-        const pushRes = await PushEngine.push(targetFarm, this._gateway, 50);
+        const pushRes = await PushEngine.push(targetFarm, this._gateway, 50, new Date(), options?.force ?? false);
         pushTotal += pushRes.pushedCount;
         pushFailed += pushRes.failedCount;
         lastPushHasMore = pushRes.hasMore;
@@ -171,6 +189,7 @@ export class SyncEngine {
         pullResult: { pulledCount: pullTotal, newRev, hasMore: lastPullHasMore },
       };
     } catch (err: unknown) {
+      console.error('[SyncEngine Error]:', err);
       this._lastError = err instanceof Error ? err.message : String(err);
       await this.refreshPendingCount();
       throw err;
@@ -214,4 +233,5 @@ export class SyncEngine {
   }
 }
 
-export const syncEngine = new SyncEngine();
+const initialGateway = isSupabaseConfigured() ? supabaseRemoteGateway : defaultRemoteGateway;
+export const syncEngine = new SyncEngine(initialGateway);
