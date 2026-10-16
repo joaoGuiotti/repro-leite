@@ -1,4 +1,4 @@
-import { index, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { index, integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
 import { farms } from '@core/db/schema/farms';
 
@@ -32,6 +32,7 @@ export const animals = sqliteTable(
     maternalGrandsireName: text('maternal_grandsire_name'),
     paternalGrandsireName: text('paternal_grandsire_name'),
     notes: text('notes'),
+    earTagConflict: integer('ear_tag_conflict').notNull().default(0),
     createdAt: text('created_at').notNull(),
     updatedAt: text('updated_at').notNull(),
     deletedAt: text('deleted_at'),

@@ -69,8 +69,10 @@ export class AnimalSqliteRepository implements AnimalRepository {
     const db = getDatabase();
     const now = new Date().toISOString();
 
+    const { earTagConflict, ...restUpdates } = updates;
     const dbUpdates: Partial<typeof animals.$inferInsert> = {
-      ...updates,
+      ...restUpdates,
+      ...(earTagConflict !== undefined ? { earTagConflict: earTagConflict ? 1 : 0 } : {}),
       updatedAt: now,
     };
 

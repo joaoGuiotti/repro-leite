@@ -14,6 +14,7 @@ module.exports = {
   moduleNameMapper: {
     '^expo-sqlite$': '<rootDir>/__mocks__/expo-sqlite.ts',
     '^expo-haptics$': '<rootDir>/__mocks__/expo-haptics.ts',
+    '^expo-secure-store$': '<rootDir>/__mocks__/expo-secure-store.ts',
     '^@shopify/flash-list$': '<rootDir>/__mocks__/@shopify/flash-list.js',
     '^react-native$': '<rootDir>/__mocks__/react-native.js',
     '^@react-native-community/netinfo$': '<rootDir>/node_modules/@react-native-community/netinfo/jest/netinfo-mock.js',

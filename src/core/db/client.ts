@@ -149,6 +149,7 @@ export async function initDatabase(): Promise<void> {
       maternal_grandsire_name TEXT,
       paternal_grandsire_name TEXT,
       notes TEXT,
+      ear_tag_conflict INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       deleted_at TEXT
@@ -221,6 +222,7 @@ export async function initDatabase(): Promise<void> {
     { name: 'dam_name', def: 'dam_name TEXT' },
     { name: 'maternal_grandsire_name', def: 'maternal_grandsire_name TEXT' },
     { name: 'paternal_grandsire_name', def: 'paternal_grandsire_name TEXT' },
+    { name: 'ear_tag_conflict', def: 'ear_tag_conflict INTEGER NOT NULL DEFAULT 0' },
   ];
   for (const col of animalCols) {
     addColumnIfNotExists(rawDb, 'animals', col.name, col.def);

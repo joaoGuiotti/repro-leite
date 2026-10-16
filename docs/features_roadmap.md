@@ -29,7 +29,7 @@ Validação feita contra o código e `specs/*/tasks.md`: `npx tsc --noEmit` sem 
 | 003-hoje-no-curral | `specs/003-hoje-no-curral` | ✅ Implementada | Feature `today`: cios 21d, toques 45d, trato do bezerreiro e `PendingSyncBadge`. |
 | 004-bezerras-aleitamento-recria | `specs/004-bezerras-aleitamento-recria` | ✅ Implementada | Feature `calves`: genealogia, aleitamento, pesagens/GMD, régua de 1ª IA, filtros por sexo. |
 | 005-ajustes-e-backup | `specs/005-ajustes-e-backup` | ✅ Implementada | Exportação CSV Rebanho/Bezerras (UTF-8 BOM), Backup JSON WhatsApp e cópia, Restauração atômica com confirmação e edição de parâmetros zootécnicos. |
-| 006-conta-e-sync-supabase | _sem spec_ | ⬜ Planejada | Supabase, login OTP, sessão segura, criação automática da fazenda e sync remoto. |
+| 006-conta-e-sync-supabase | `specs/006-conta-e-sync-supabase` | ✅ Implementada | Supabase, login OTP, sessão segura, criação automática da fazenda e sync remoto. |
 | 007-convite-inseminador | _sem spec_ | ⬜ Planejada | `farm_members`, `farm_invites` e RPCs de convite. |
 | 008-backup-automatico | _sem spec_ | ⬜ Planejada | Repositório `backup-rebanho` e workflow diário no GitHub Actions. |
 | 009-notificacoes-locais | _sem spec_ | ⬜ Planejada | Alertas agendados e resumo diário. |
@@ -39,8 +39,6 @@ Validação feita contra o código e `specs/*/tasks.md`: `npx tsc --noEmit` sem 
 
 | Item não implementado | Situação atual | Feature |
 | --- | --- | --- |
-| **Supabase** | Não há `@supabase/supabase-js` nem referência a Supabase em `src/`. `core/network/api-client.ts` é só a camada de ports, então o sync (push, pull, conflito, scheduler, outbox, já testados) ainda não tem destino remoto. | 006 |
-| **Login e conta** | Faltam OTP, `expo-secure-store` e a criação automática da fazenda. O botão "Entrar com Conta" é placeholder. | 006 |
 | **Convite do inseminador** | Faltam `farm_members`, `farm_invites` e as RPCs `create_invite`/`accept_invite`. | 007 |
 | **Backup Automático** | Não existe `.github/workflows` nem o repositório `backup-rebanho`. | 008 |
 | **Notificações** | Falta `expo-notifications` (locais agendadas e resumo diário). | 009 |
@@ -258,7 +256,7 @@ flowchart TD
 
 ### Feature 006: `006-conta-e-sync-supabase`
 **Tema:** Supabase, Login por Conta (OTP), Sessão Segura e Sync Remoto  
-**Status:** ⬜ Planejada. O motor de sync (`core/sync`) e a outbox já existem; falta o destino remoto.  
+**Status:** ✅ Implementada (`specs/006-conta-e-sync-supabase`), em `src/features/account`, `src/core/network` e `src/core/sync`.  
 **Dependência:** `000-fundacao-offline`, `001-rebanho-e-touros`
 
 - **Escopo**:

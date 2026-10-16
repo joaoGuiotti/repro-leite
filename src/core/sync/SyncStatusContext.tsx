@@ -3,6 +3,7 @@ import { SyncProtectionState, resolveProtectionStatus, getSyncStateDescription }
 import { syncEngine, SyncEngineStatus } from './sync-engine';
 import { syncScheduler } from './scheduler';
 import { networkMonitor } from '../network/network-monitor';
+import { supabaseRemoteGateway } from '../network/supabase-remote-gateway';
 
 export interface SyncStatusContextType {
   state: SyncProtectionState;
@@ -10,6 +11,8 @@ export interface SyncStatusContextType {
   lastSyncedDescription: string;
   isSimulatedOffline: boolean;
   isOnline: boolean;
+  clockDriftExceeded: boolean;
+  lastError: string | null;
   toggleSimulatedOffline: () => void;
   triggerSyncNow: () => Promise<void>;
   refreshPendingCount: () => Promise<void>;
@@ -20,6 +23,7 @@ const SyncStatusContext = createContext<SyncStatusContextType | null>(null);
 export function SyncStatusProvider({ children }: { children: ReactNode }) {
   const [engineStatus, setEngineStatus] = useState<SyncEngineStatus>(syncEngine.getStatus());
   const [isSimulatedOffline, setIsSimulatedOffline] = useState<boolean>(networkMonitor.isSimulatedOffline());
+  const [clockDriftExceeded, setClockDriftExceeded] = useState<boolean>(false);
 
   useEffect(() => {
     // Inicializa o engine e o agendador de sincronização
@@ -56,9 +60,11 @@ export function SyncStatusProvider({ children }: { children: ReactNode }) {
       return;
     }
     try {
-      await syncEngine.sync();
-    } catch {
-      // Estado de erro já capturado e emitido pelo syncEngine
+      const drift = await supabaseRemoteGateway.checkServerTimeDrift();
+      setClockDriftExceeded(drift.isClockDriftExceeded);
+      await syncEngine.sync({ force: true });
+    } catch (e) {
+      console.error('[triggerSyncNow Error]:', e);
     }
   }, []);
 
@@ -86,6 +92,8 @@ export function SyncStatusProvider({ children }: { children: ReactNode }) {
     ),
     isSimulatedOffline,
     isOnline: engineStatus.isOnline,
+    clockDriftExceeded,
+    lastError: engineStatus.lastError,
     toggleSimulatedOffline,
     triggerSyncNow,
     refreshPendingCount,

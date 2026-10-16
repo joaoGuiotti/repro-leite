@@ -18,9 +18,12 @@ export class PushEngine {
     farmId: string,
     gateway: RemoteSyncGateway,
     batchSize: number = 50,
-    now: Date = new Date()
+    now: Date = new Date(),
+    force: boolean = false
   ): Promise<PushResult> {
-    const batch = await OutboxRepository.peekBatch(farmId, batchSize, now);
+    const batch = force
+      ? await OutboxRepository.peekBatch(farmId, batchSize, now, true)
+      : await OutboxRepository.peekBatch(farmId, batchSize, now);
 
     if (batch.length === 0) {
       return {
