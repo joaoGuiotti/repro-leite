@@ -131,10 +131,26 @@ export class SupabaseAuthRepository implements AuthGateway {
         return null;
       }
 
+      let resolvedFarmId = '';
+      try {
+        const { data: memberData } = await this.client
+          .from('farm_members')
+          .select('farm_id')
+          .eq('user_id', data.session.user.id)
+          .is('deleted_at', null)
+          .limit(1);
+
+        if (memberData && memberData.length > 0 && memberData[0].farm_id) {
+          resolvedFarmId = memberData[0].farm_id;
+        }
+      } catch {
+        // Silencioso se offline
+      }
+
       return {
         userId: data.session.user.id,
         email: data.session.user.email || '',
-        farmId: '', // Será atualizado ou preenchido pelo estado da conta
+        farmId: resolvedFarmId,
         accessToken: data.session.access_token,
         expiresAt: data.session.expires_at ? data.session.expires_at * 1000 : Date.now() + 3600000,
       };

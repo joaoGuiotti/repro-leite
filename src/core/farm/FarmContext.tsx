@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
-import { getDatabase, DEFAULT_FARM_ID, DEFAULT_FARM_NAME, schema } from '@core/db';
+import { getDatabase, getExpoDatabase, DEFAULT_FARM_ID, DEFAULT_FARM_NAME, schema } from '@core/db';
 import { eq } from 'drizzle-orm';
 import { OutboxRepository } from '@core/sync/outbox.repository';
+import { syncEngine } from '@core/sync/sync-engine';
 
 export interface FarmContextType {
   farmId: string;
@@ -16,15 +17,40 @@ export function FarmProvider({ children }: { children: ReactNode }) {
   const [farmId, setFarmId] = useState<string>(DEFAULT_FARM_ID);
   const [farmName, setFarmName] = useState<string>(DEFAULT_FARM_NAME);
 
+  const refreshFarm = useCallback(async () => {
+    try {
+      const rawDb = getExpoDatabase();
+      const row = rawDb.getFirstSync(
+        'SELECT id, name FROM farms LIMIT 1;'
+      ) as { id: string; name: string } | null;
+
+      if (row && row.name) {
+        setFarmId(row.id);
+        setFarmName(row.name);
+        if (row.id && syncEngine.farmId !== row.id) {
+          syncEngine.setFarmId(row.id);
+        }
+      }
+    } catch {
+      // Silencioso se banco ainda estiver inicializando
+    }
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
     (async () => {
       try {
-        const db = getDatabase();
-        const existing = await db.select().from(schema.farms).limit(1);
-        if (isMounted && existing.length > 0) {
-          setFarmId(existing[0].id);
-          setFarmName(existing[0].name || DEFAULT_FARM_NAME);
+        const rawDb = getExpoDatabase();
+        const row = rawDb.getFirstSync(
+          'SELECT id, name FROM farms LIMIT 1;'
+        ) as { id: string; name: string } | null;
+
+        if (isMounted && row && row.name) {
+          setFarmId(row.id);
+          setFarmName(row.name);
+          if (row.id && syncEngine.farmId !== row.id) {
+            syncEngine.setFarmId(row.id);
+          }
         }
       } catch {
         // Silencioso se o banco de dados ainda estiver inicializando
@@ -35,6 +61,19 @@ export function FarmProvider({ children }: { children: ReactNode }) {
       isMounted = false;
     };
   }, []);
+
+  // Atualiza automaticamente o nome e id da fazenda após sincronizações com o servidor
+  useEffect(() => {
+    const unsubscribe = syncEngine.addListener((status) => {
+      if (!status.isSyncing) {
+        void refreshFarm();
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [refreshFarm]);
 
   const updateFarmName = async (newName: string): Promise<boolean> => {
     const trimmed = newName.trim();
@@ -68,19 +107,6 @@ export function FarmProvider({ children }: { children: ReactNode }) {
       return false;
     }
   };
-
-  const refreshFarm = useCallback(async () => {
-    try {
-      const db = getDatabase();
-      const existing = await db.select().from(schema.farms).limit(1);
-      if (existing.length > 0) {
-        setFarmId(existing[0].id);
-        setFarmName(existing[0].name || DEFAULT_FARM_NAME);
-      }
-    } catch {
-      // Silencioso
-    }
-  }, []);
 
   return (
     <FarmContext.Provider value={{ farmId, farmName, updateFarmName, refreshFarm }}>

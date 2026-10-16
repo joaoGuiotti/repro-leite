@@ -58,6 +58,12 @@ export class PullEngine {
     const now = new Date().toISOString();
 
     // 3. Aplica alterações em lote transacional
+    try {
+      rawDb.execSync('PRAGMA foreign_keys = OFF;');
+    } catch {
+      // Ignora em mocks ou ambientes sem PRAGMA
+    }
+
     rawDb.execSync('BEGIN TRANSACTION;');
     try {
       for (const change of response.changes) {
@@ -90,6 +96,12 @@ export class PullEngine {
     } catch (error) {
       rawDb.execSync('ROLLBACK;');
       throw error;
+    } finally {
+      try {
+        rawDb.execSync('PRAGMA foreign_keys = ON;');
+      } catch {
+        // Ignora em mocks ou ambientes sem PRAGMA
+      }
     }
 
     return {
@@ -129,7 +141,7 @@ export class PullEngine {
     const remoteData = {
       ...change.data,
       id: change.recordId,
-      farm_id: change.farmId,
+      ...(change.tableName !== 'farms' ? { farm_id: change.farmId } : {}),
       updated_at: change.updatedAt,
       deleted_at: change.deletedAt,
     };
@@ -141,6 +153,15 @@ export class PullEngine {
     }
 
     const recordToApply = resolution.resolvedRecord;
+
+    // Se a tabela for farms, substitui qualquer ID local obsoleto pelo ID da nuvem
+    if (change.tableName === 'farms') {
+      try {
+        rawDb.runSync(`DELETE FROM farms WHERE id != ?;`, [change.recordId]);
+      } catch {
+        // Ignora
+      }
+    }
 
     // Se estiver marcado para exclusão suave
     if (recordToApply.deleted_at || recordToApply.deletedAt) {
@@ -154,6 +175,61 @@ export class PullEngine {
         );
       }
       return;
+    }
+
+    // Trata conflito de brinco duplicado para a tabela animals (SC-007)
+    if (change.tableName === 'animals' && !recordToApply.deleted_at && !recordToApply.deletedAt) {
+      const incomingEarTag = (recordToApply.ear_tag ?? recordToApply.earTag) as string;
+      const incomingFarmId = (recordToApply.farm_id ?? recordToApply.farmId ?? change.farmId) as string;
+      const normTag = incomingEarTag ? String(incomingEarTag).trim().toLowerCase() : '';
+
+      if (normTag) {
+        recordToApply.ear_tag_normalized = normTag;
+
+        try {
+          const conflictingAnimal = rawDb.getFirstSync(
+            `SELECT id, ear_tag FROM animals WHERE farm_id = ? AND ear_tag_normalized = ? AND id != ? AND deleted_at IS NULL AND exit_status = 'ativo' LIMIT 1;`,
+            [incomingFarmId, normTag, change.recordId]
+          ) as { id: string; ear_tag: string } | null;
+
+          if (conflictingAnimal) {
+            // Marca o animal local existente com conflito de brinco
+            rawDb.runSync(
+              `UPDATE animals SET ear_tag_conflict = 1 WHERE id = ?;`,
+              [conflictingAnimal.id]
+            );
+
+            // Ajusta o brinco do animal entrante com sufixo identificador para não violar o índice UNIQUE
+            const shortId = change.recordId.slice(-4);
+            recordToApply.ear_tag = `${incomingEarTag} (dup-${shortId})`;
+            recordToApply.ear_tag_normalized = `${normTag}_dup_${shortId}`;
+            recordToApply.ear_tag_conflict = 1;
+          }
+        } catch {
+          // Ignora se tabela animals ou colunas ainda não inicializadas
+        }
+      }
+    }
+
+    // Trata chave duplicada na tabela settings (farm_id, key)
+    if (change.tableName === 'settings') {
+      const incomingKey = recordToApply.key as string;
+      const incomingFarmId = (recordToApply.farm_id ?? recordToApply.farmId ?? change.farmId) as string;
+
+      if (incomingKey && incomingFarmId) {
+        try {
+          const existingSetting = rawDb.getFirstSync(
+            `SELECT id FROM settings WHERE farm_id = ? AND key = ? AND id != ? LIMIT 1;`,
+            [incomingFarmId, incomingKey, change.recordId]
+          ) as { id: string } | null;
+
+          if (existingSetting) {
+            rawDb.runSync(`DELETE FROM settings WHERE id = ?;`, [existingSetting.id]);
+          }
+        } catch {
+          // Ignora
+        }
+      }
     }
 
     // Upsert no registro local
@@ -205,7 +281,16 @@ export class PullEngine {
       placeholders.push('?');
     }
 
-    const sql = `INSERT OR REPLACE INTO ${tableName} (${columns.join(', ')}) VALUES (${placeholders.join(', ')});`;
+    const updateClauses = columns
+      .filter((col) => col !== 'id')
+      .map((col) => `${col} = excluded.${col}`)
+      .join(', ');
+
+    const sql =
+      updateClauses.length > 0
+        ? `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${placeholders.join(', ')}) ON CONFLICT(id) DO UPDATE SET ${updateClauses};`
+        : `INSERT OR IGNORE INTO ${tableName} (${columns.join(', ')}) VALUES (${placeholders.join(', ')});`;
+
     rawDb.runSync(sql, values as (string | number | null)[]);
   }
 
