@@ -18,6 +18,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import { ListAnimalsUseCase } from '../../application/list-animals.usecase';
 import { RegisterAnimalUseCase } from '../../application/register-animal.usecase';
 import { RemoveAnimalUseCase } from '../../application/remove-animal.usecase';
@@ -71,6 +72,12 @@ export function HerdScreen({
 
   const { registerAnimal } = useRegisterAnimal(registerUseCase);
   const { registerExit, reactivateAnimal } = useRemoveAnimal(removeUseCase);
+
+  useFocusEffect(
+    useCallback(() => {
+      void refresh();
+    }, [refresh])
+  );
 
   useEffect(() => {
     onCountChange?.(summary.total);
@@ -343,6 +350,8 @@ export function HerdScreen({
         data={animals}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
+        refreshing={loading}
+        onRefresh={refresh}
         ListHeaderComponent={renderHeader}
         ListEmptyComponent={
           loading ? (

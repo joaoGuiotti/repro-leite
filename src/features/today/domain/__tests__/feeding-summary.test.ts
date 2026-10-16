@@ -44,7 +44,7 @@ describe('feeding-summary (Pure Domain Engine)', () => {
       expect(summary.transitioningCalves).toHaveLength(0);
     });
 
-    it('soma corretamente litros de diferentes fases e ignora machos e inativos', () => {
+    it('soma corretamente litros de diferentes fases (machos e fêmeas) e ignora inativos', () => {
       const calves = [
         {
           id: 'c1',
@@ -83,7 +83,7 @@ describe('feeding-summary (Pure Domain Engine)', () => {
           earTag: '99',
           name: 'Bezerro Macho',
           sex: 'macho' as const,
-          birthDate: '2026-10-04',
+          birthDate: '2026-10-04', // 10 dias -> inicial (2L + 2L)
           exitStatus: 'ativo',
         },
         {
@@ -98,11 +98,11 @@ describe('feeding-summary (Pure Domain Engine)', () => {
 
       const summary = calculateDailyFeedingSummary(calves, referenceDate);
 
-      // c1 (2+2) + c2 (4+4) + c3 (2+2) = 8L manhã + 8L tarde = 16L total
-      expect(summary.totalMorningLiters).toBe(8);
-      expect(summary.totalAfternoonLiters).toBe(8);
-      expect(summary.totalDailyLiters).toBe(16);
-      expect(summary.activeCalvesCount).toBe(3);
+      // c1 (2+2) + c2 (4+4) + c3 (2+2) + m1 (2+2) = 10L manhã + 10L tarde = 20L total
+      expect(summary.totalMorningLiters).toBe(10);
+      expect(summary.totalAfternoonLiters).toBe(10);
+      expect(summary.totalDailyLiters).toBe(20);
+      expect(summary.activeCalvesCount).toBe(4);
       expect(summary.weaningCount).toBe(1);
       expect(summary.transitioningCalves).toHaveLength(1);
       expect(summary.transitioningCalves[0].earTag).toBe('30');

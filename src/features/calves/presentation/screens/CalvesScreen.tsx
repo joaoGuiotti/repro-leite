@@ -16,15 +16,15 @@ import {
   Search,
   TrendingUp,
 } from 'lucide-react-native';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
-  FlatList,
   RefreshControl,
   Text,
   TouchableOpacity,
   useWindowDimensions,
   View,
 } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import { CalvesUseCases } from '../../factory';
 import { AddWeighingModal } from '../components/AddWeighingModal';
 import { CalfDetailPane } from '../components/CalfDetailPane';
@@ -64,6 +64,12 @@ export function CalvesScreen({ farmId = DEFAULT_FARM_ID, useCases }: CalvesScree
     excluirBezerra,
   } = useCalvesList({ farmId, useCases });
 
+  useFocusEffect(
+    useCallback(() => {
+      void refresh();
+    }, [refresh])
+  );
+
   const [modalCadastroAberto, setModalCadastroAberto] = useState(false);
   const [modalPesagemAberto, setModalPesagemAberto] = useState(false);
   const [mobileView, setMobileView] = useState<'list' | 'detail'>('list');
@@ -85,8 +91,11 @@ export function CalvesScreen({ farmId = DEFAULT_FARM_ID, useCases }: CalvesScree
 
   return (
     <Screen
-      scroll={false}
-      className="p-3 sm:p-4 gap-3 bg-surface-variant dark:bg-surface-dark flex-1"
+      scroll
+      refreshControl={
+        <RefreshControl refreshing={loading} onRefresh={refresh} />
+      }
+      contentContainerClassName="p-3 sm:p-4 gap-3 pb-12"
       testID="calves-screen"
     >
       {/* Cabeçalho Geral da Tela Fiel ao Mockup */}
@@ -148,9 +157,9 @@ export function CalvesScreen({ farmId = DEFAULT_FARM_ID, useCases }: CalvesScree
       {/* Conteúdo Master-Detail */}
       {isTabletOrDesktop ? (
         // LAYOUT TABLET / DESKTOP (Master-Detail lado a lado)
-        <View className="flex-1 flex-row gap-4 overflow-hidden">
+        <View className="flex-1 flex-row gap-4 items-start">
           {/* Coluna da Esquerda: Master List (largura fixa ~380-420px) */}
-          <View className="w-[380px] lg:w-[420px] rounded-2xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 p-3.5 flex-1">
+          <View className="w-[380px] lg:w-[420px] rounded-2xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 p-3.5">
             {/* Campo de Busca */}
             <View className="mb-3">
               <CampoTexto
@@ -175,14 +184,14 @@ export function CalvesScreen({ farmId = DEFAULT_FARM_ID, useCases }: CalvesScree
                   key={f.id}
                   onPress={() => setSexFilter(f.id)}
                   className={`flex-1 py-1.5 rounded-lg items-center justify-center ${sexFilter === f.id
-                      ? 'bg-white dark:bg-slate-900 shadow-2xs'
-                      : ''
+                    ? 'bg-white dark:bg-slate-900 shadow-2xs'
+                    : ''
                     }`}
                 >
                   <Text
                     className={`text-xs font-bold ${sexFilter === f.id
-                        ? 'text-pasto-900 dark:text-pasto-200'
-                        : 'text-gray-500 dark:text-gray-400'
+                      ? 'text-pasto-900 dark:text-pasto-200'
+                      : 'text-gray-500 dark:text-gray-400'
                       }`}
                   >
                     {f.label}
@@ -208,21 +217,16 @@ export function CalvesScreen({ farmId = DEFAULT_FARM_ID, useCases }: CalvesScree
                 onAction={handleCadastrarNova}
               />
             ) : (
-              <FlatList
-                data={calves}
-                keyExtractor={(item) => item.id}
-                showsVerticalScrollIndicator={false}
-                refreshControl={
-                  <RefreshControl refreshing={loading} onRefresh={refresh} />
-                }
-                renderItem={({ item }) => (
+              <View>
+                {calves.map((item) => (
                   <CalfListCard
+                    key={item.id}
                     item={item}
                     isSelected={item.id === activeCalfId}
                     onPress={() => handleSelectCalf(item.id)}
                   />
-                )}
-              />
+                ))}
+              </View>
             )}
           </View>
 
@@ -246,7 +250,7 @@ export function CalvesScreen({ farmId = DEFAULT_FARM_ID, useCases }: CalvesScree
         </View>
       ) : (
         // LAYOUT MOBILE (<768px): Alternância Fluida Lista / Detalhe
-        <View className="flex-1">
+        <View className="flex-1 pt-2">
           {mobileView === 'detail' && activeCalf ? (
             <View className="flex-1">
               <TouchableOpacity
@@ -294,14 +298,14 @@ export function CalvesScreen({ farmId = DEFAULT_FARM_ID, useCases }: CalvesScree
                     key={f.id}
                     onPress={() => setSexFilter(f.id)}
                     className={`flex-1 py-1.5 rounded-lg items-center justify-center ${sexFilter === f.id
-                        ? 'bg-white dark:bg-slate-900 shadow-2xs'
-                        : ''
+                      ? 'bg-white dark:bg-slate-900 shadow-2xs'
+                      : ''
                       }`}
                   >
                     <Text
                       className={`text-xs font-bold ${sexFilter === f.id
-                          ? 'text-pasto-900 dark:text-pasto-200'
-                          : 'text-gray-500 dark:text-gray-400'
+                        ? 'text-pasto-900 dark:text-pasto-200'
+                        : 'text-gray-500 dark:text-gray-400'
                         }`}
                     >
                       {f.label}
@@ -323,21 +327,16 @@ export function CalvesScreen({ farmId = DEFAULT_FARM_ID, useCases }: CalvesScree
                   onAction={handleCadastrarNova}
                 />
               ) : (
-                <FlatList
-                  data={calves}
-                  keyExtractor={(item) => item.id}
-                  showsVerticalScrollIndicator={false}
-                  refreshControl={
-                    <RefreshControl refreshing={loading} onRefresh={refresh} />
-                  }
-                  renderItem={({ item }) => (
+                <View>
+                  {calves.map((item) => (
                     <CalfListCard
+                      key={item.id}
                       item={item}
                       isSelected={item.id === activeCalfId}
                       onPress={() => handleSelectCalf(item.id)}
                     />
-                  )}
-                />
+                  ))}
+                </View>
               )}
             </View>
           )}

@@ -16,6 +16,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useManagementDate } from '@core/simulation';
 import { RegisterCalfInput } from '../../application/register-calf.usecase';
 import {
   BullOption,
@@ -44,15 +45,29 @@ export function RegisterCalfModal({
   tourosDisponiveis = [],
   vacasDisponiveis = [],
 }: RegisterCalfModalProps) {
+  let activeDateString = new Date().toISOString().split('T')[0];
+  try {
+    const dateCtx = useManagementDate();
+    activeDateString = dateCtx.activeDateString;
+  } catch {
+    // fallback
+  }
+
   const [brinco, setBrinco] = useState('');
   const [nome, setNome] = useState('');
   const [sexo, setSexo] = useState<'femea' | 'macho'>('femea');
   const [raca, setRaca] = useState('Girolando');
-  const [dataNascimento, setDataNascimento] = useState(() => {
-    return new Date().toISOString().split('T')[0];
-  });
+  const [dataNascimento, setDataNascimento] = useState(activeDateString);
   const [pesoNascimento, setPesoNascimento] = useState(String(DEFAULT_BIRTH_WEIGHT_KG));
   const [notas, setNotas] = useState('');
+
+  const [prevVisivel, setPrevVisivel] = useState(visivel);
+  if (visivel !== prevVisivel) {
+    setPrevVisivel(visivel);
+    if (visivel) {
+      setDataNascimento(activeDateString);
+    }
+  }
 
   // Genealogia
   const [touroSelecionado, setTouroSelecionado] = useState<BullOption | null>(null);
@@ -124,6 +139,7 @@ export function RegisterCalfModal({
       setNome('');
       setSexo('femea');
       setRaca('Girolando');
+      setDataNascimento(activeDateString);
       setPesoNascimento(String(DEFAULT_BIRTH_WEIGHT_KG));
       setTouroSelecionado(null);
       setVacaSelecionada(null);

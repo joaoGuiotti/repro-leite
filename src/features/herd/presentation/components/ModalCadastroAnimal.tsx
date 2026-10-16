@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useManagementDate } from '@core/simulation';
 
 interface ModalCadastroAnimalProps {
   visivel: boolean;
@@ -35,18 +36,31 @@ export function ModalCadastroAnimal({
   onSalvar,
   animaisExistentes,
 }: ModalCadastroAnimalProps) {
+  let activeDateString = new Date().toISOString().split('T')[0];
+  try {
+    const dateCtx = useManagementDate();
+    activeDateString = dateCtx.activeDateString;
+  } catch {
+    // fallback
+  }
+
   const [brinco, setBrinco] = useState('');
   const [nome, setNome] = useState('');
   const [raca, setRaca] = useState('Girolando');
   const [sexo, setSexo] = useState<AnimalSex>('femea');
   const [statusRepro, setStatusRepro] = useState<AnimalReproStatus>('vazia');
-  const [dataNascimento, setDataNascimento] = useState(() => {
-    const hoje = new Date();
-    return hoje.toISOString().split('T')[0];
-  });
+  const [dataNascimento, setDataNascimento] = useState(activeDateString);
   const [pesoNascimento, setPesoNascimento] = useState('40');
   const [salvando, setSalvando] = useState(false);
   const [confirmouReuso, setConfirmouReuso] = useState(false);
+
+  const [prevVisivel, setPrevVisivel] = useState(visivel);
+  if (visivel !== prevVisivel) {
+    setPrevVisivel(visivel);
+    if (visivel) {
+      setDataNascimento(activeDateString);
+    }
+  }
 
   // Avaliação em tempo real da política de reuso de brinco
   const avaliacaoBrinco = useMemo(() => {
@@ -83,6 +97,7 @@ export function ModalCadastroAnimal({
       // Reset
       setBrinco('');
       setNome('');
+      setDataNascimento(activeDateString);
       setConfirmouReuso(false);
       onFechar();
     } catch (error) {

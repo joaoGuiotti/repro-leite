@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from 'react';
-import { Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import React, { useCallback, useMemo, useState } from 'react';
+import { RefreshControl, Text, View } from 'react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { i18n } from '@/i18n';
 import { Cartao, ErrorState, ListLoadingState, Screen, SeloStatus } from '@/ui';
 import { DEFAULT_FARM_ID } from '@core/db';
@@ -34,6 +34,12 @@ export function TodayScreen({ farmId = DEFAULT_FARM_ID }: TodayScreenProps) {
     todayUseCases.getDashboardUseCase
   );
 
+  useFocusEffect(
+    useCallback(() => {
+      void refresh();
+    }, [refresh])
+  );
+
   const { actionLoadingId, handleHeatChoice, handlePregnancyDiagnosis } =
     useTodayActions({
       farmId,
@@ -59,7 +65,13 @@ export function TodayScreen({ farmId = DEFAULT_FARM_ID }: TodayScreenProps) {
   };
 
   return (
-    <Screen scroll contentContainerClassName="gap-4 p-4 pb-16">
+    <Screen
+      scroll
+      refreshControl={
+        <RefreshControl refreshing={loading} onRefresh={refresh} />
+      }
+      contentContainerClassName="gap-4 p-4 pb-16"
+    >
       {/* 1. Card de Boas-Vindas e Resumo do Dia */}
       <Cartao titulo={i18n.today.title}>
         <View className="flex-row items-center justify-between pb-2">

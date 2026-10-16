@@ -70,8 +70,8 @@ export function calculateDailyFeedingSummary(
   const transitioningCalves: CalfTransitionItem[] = [];
 
   for (const calf of calves) {
-    // Apenas fêmeas ativas e com menos de 180 dias de vida entram no cálculo do bezerreiro
-    if (calf.exitStatus !== 'ativo' || calf.sex !== 'femea') {
+    // Animais ativos e com menos de 180 dias de vida entram no cálculo do bezerreiro (machos e fêmeas)
+    if (calf.exitStatus !== 'ativo') {
       continue;
     }
 

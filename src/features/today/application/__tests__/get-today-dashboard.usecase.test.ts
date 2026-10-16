@@ -80,4 +80,32 @@ describe('GetTodayDashboardUseCase', () => {
       expect(result.value.counts.totalAfternoonLiters).toBe(4);
     }
   });
+
+  it('reflete nova bezerra recém-cadastrada no painel diário e no resumo de aleitamento', async () => {
+    // Simula que após o cadastro de uma bezerra no mesmo dia de referência, o repositório a retorna
+    repo.listAnimalsForFeeding.mockResolvedValue([
+      {
+        id: 'new-calf-1',
+        earTag: '9901',
+        name: 'Mimosa',
+        sex: 'femea',
+        birthDate: '2026-10-14', // Recém-nascida no dia de referência (0 dias) -> fase inicial (2L + 2L)
+        exitStatus: 'ativo',
+      },
+    ]);
+
+    const result = await useCase.execute({
+      farmId: 'f1',
+      referenceDate: '2026-10-14',
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.counts.activeCalves).toBe(1);
+      expect(result.value.counts.totalMorningLiters).toBe(2);
+      expect(result.value.counts.totalAfternoonLiters).toBe(2);
+      expect(result.value.feedingSummary.activeCalvesCount).toBe(1);
+      expect(result.value.feedingSummary.totalDailyLiters).toBe(4);
+    }
+  });
 });
