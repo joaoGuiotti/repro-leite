@@ -7,7 +7,7 @@ import {
   ListLoadingState,
   Screen,
 } from '@/ui';
-import { DEFAULT_FARM_ID } from '@core/db';
+import { useFarm } from '@core/farm';
 import { useFocusEffect } from 'expo-router';
 import {
   ArrowLeft,
@@ -37,7 +37,9 @@ export interface CalvesScreenProps {
   useCases?: CalvesUseCases;
 }
 
-export function CalvesScreen({ farmId = DEFAULT_FARM_ID, useCases }: CalvesScreenProps) {
+export function CalvesScreen({ farmId: propFarmId, useCases }: CalvesScreenProps) {
+  const { farmId: contextFarmId } = useFarm();
+  const farmId = propFarmId ?? contextFarmId;
   const { width } = useWindowDimensions();
   const isTabletOrDesktop = width >= 768;
 

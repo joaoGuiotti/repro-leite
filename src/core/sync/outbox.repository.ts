@@ -1,8 +1,10 @@
 import { eq, count, inArray, asc, and, or, isNull, lte } from 'drizzle-orm';
-import { getDatabase, generateUUID } from '@core/db/client';
+import { DEFAULT_FARM_ID, getDatabase, generateUUID } from '@core/db/client';
 import * as schema from '@core/db/schema';
 
 export type OutboxStatus = 'pending' | 'in_flight' | 'failed' | 'completed';
+
+export type OutboxChangeListener = (event: { isEnqueue: boolean }) => void;
 
 export interface EnqueueOptions {
   farmId: string;
@@ -13,24 +15,86 @@ export interface EnqueueOptions {
   operationId?: string;
 }
 
+function resolveTargetFarmIds(farmId?: string): string[] {
+  if (!farmId || farmId === DEFAULT_FARM_ID) {
+    return [DEFAULT_FARM_ID];
+  }
+  return [farmId, DEFAULT_FARM_ID];
+}
+
 export class OutboxRepository {
+  private static _listeners: Set<OutboxChangeListener> = new Set();
+
+  /**
+   * Registra um listener que é disparado sempre que a fila sync_queue sofre mutação.
+   */
+  static addChangeListener(listener: OutboxChangeListener): () => void {
+    OutboxRepository._listeners.add(listener);
+    return () => {
+      OutboxRepository._listeners.delete(listener);
+    };
+  }
+
+  /**
+   * Notifica todos os listeners registrados sobre alterações na outbox.
+   */
+  static notifyChange(event: { isEnqueue: boolean } = { isEnqueue: false }): void {
+    for (const listener of OutboxRepository._listeners) {
+      try {
+        listener(event);
+      } catch {
+        // Ignora erro em listener individual
+      }
+    }
+  }
+
   /**
    * Retorna a quantidade de alterações locais pendentes de sincronização
    * (status 'pending', 'in_flight' ou 'failed').
    */
   static async getPendingCount(farmId: string): Promise<number> {
     const db = getDatabase();
+    const targetFarms = resolveTargetFarmIds(farmId);
+    const farmCondition =
+      targetFarms.length === 1
+        ? eq(schema.syncQueue.farmId, targetFarms[0])
+        : inArray(schema.syncQueue.farmId, targetFarms);
+
     const result = await db
       .select({ count: count() })
       .from(schema.syncQueue)
       .where(
         and(
-          eq(schema.syncQueue.farmId, farmId),
+          farmCondition,
           inArray(schema.syncQueue.status, ['pending', 'in_flight', 'failed'])
         )
       );
 
     return result[0]?.count ?? 0;
+  }
+
+  /**
+   * Retorna os IDs dos registros (recordId) que possuem alterações pendentes na outbox.
+   */
+  static async getPendingRecordIds(farmId: string): Promise<string[]> {
+    const db = getDatabase();
+    const targetFarms = resolveTargetFarmIds(farmId);
+    const farmCondition =
+      targetFarms.length === 1
+        ? eq(schema.syncQueue.farmId, targetFarms[0])
+        : inArray(schema.syncQueue.farmId, targetFarms);
+
+    const rows = await db
+      .select({ recordId: schema.syncQueue.recordId })
+      .from(schema.syncQueue)
+      .where(
+        and(
+          farmCondition,
+          inArray(schema.syncQueue.status, ['pending', 'in_flight', 'failed'])
+        )
+      );
+
+    return Array.from(new Set(rows.map((r) => r.recordId)));
   }
 
   /**
@@ -88,6 +152,8 @@ export class OutboxRepository {
       createdAt: now,
       updatedAt: now,
     });
+
+    OutboxRepository.notifyChange({ isEnqueue: true });
   }
 
   /**
@@ -102,9 +168,14 @@ export class OutboxRepository {
   ): Promise<schema.SyncQueueEntry[]> {
     const db = getDatabase();
     const nowIso = now.toISOString();
+    const targetFarms = resolveTargetFarmIds(farmId);
+    const farmCondition =
+      targetFarms.length === 1
+        ? eq(schema.syncQueue.farmId, targetFarms[0])
+        : inArray(schema.syncQueue.farmId, targetFarms);
 
     const conditions = [
-      eq(schema.syncQueue.farmId, farmId),
+      farmCondition,
       inArray(schema.syncQueue.status, ['pending', 'failed', 'in_flight']),
     ];
 
@@ -149,13 +220,14 @@ export class OutboxRepository {
     if (ids.length === 0) return;
     const db = getDatabase();
     await db.delete(schema.syncQueue).where(inArray(schema.syncQueue.id, ids));
+    OutboxRepository.notifyChange({ isEnqueue: false });
   }
 
   /**
    * Alias semântico para confirmar envio concluído.
    */
   static async markCompleted(ids: string[]): Promise<void> {
-    await this.removeBatch(ids);
+    await OutboxRepository.removeBatch(ids);
   }
 
   /**
@@ -188,6 +260,8 @@ export class OutboxRepository {
           updatedAt: now,
         })
         .where(eq(schema.syncQueue.id, id));
+
+      OutboxRepository.notifyChange({ isEnqueue: false });
     }
   }
 
@@ -199,9 +273,17 @@ export class OutboxRepository {
     const db = getDatabase();
     const now = new Date().toISOString();
 
-    const condition = farmId
-      ? and(eq(schema.syncQueue.farmId, farmId), eq(schema.syncQueue.status, 'in_flight'))
-      : eq(schema.syncQueue.status, 'in_flight');
+    let condition;
+    if (farmId) {
+      const targetFarms = resolveTargetFarmIds(farmId);
+      const farmCondition =
+        targetFarms.length === 1
+          ? eq(schema.syncQueue.farmId, targetFarms[0])
+          : inArray(schema.syncQueue.farmId, targetFarms);
+      condition = and(farmCondition, eq(schema.syncQueue.status, 'in_flight'));
+    } else {
+      condition = eq(schema.syncQueue.status, 'in_flight');
+    }
 
     await db
       .update(schema.syncQueue)
@@ -210,6 +292,8 @@ export class OutboxRepository {
         updatedAt: now,
       })
       .where(condition);
+
+    OutboxRepository.notifyChange({ isEnqueue: false });
   }
 
   /**
@@ -217,12 +301,19 @@ export class OutboxRepository {
    */
   static async getAll(farmId: string): Promise<schema.SyncQueueEntry[]> {
     const db = getDatabase();
+    const targetFarms = resolveTargetFarmIds(farmId);
+    const farmCondition =
+      targetFarms.length === 1
+        ? eq(schema.syncQueue.farmId, targetFarms[0])
+        : inArray(schema.syncQueue.farmId, targetFarms);
+
     return db
       .select()
       .from(schema.syncQueue)
-      .where(eq(schema.syncQueue.farmId, farmId))
+      .where(farmCondition)
       .orderBy(asc(schema.syncQueue.createdAt));
   }
 }
 
 export { OutboxRepository as SyncQueueRepository };
+

@@ -3,15 +3,16 @@ import { PullEngine, PullResult } from './pull';
 import { OutboxRepository } from './outbox.repository';
 import { RemoteSyncGateway, defaultRemoteGateway } from '../network/api-client';
 import { supabaseRemoteGateway } from '../network/supabase-remote-gateway';
-import { isSupabaseConfigured } from '../network/supabase-client';
 import { networkMonitor, NetworkMonitor } from '../network/network-monitor';
 import { DEFAULT_FARM_ID, getDatabase } from '@core/db/client';
+import { onTransactionCommitted } from '@core/db/transaction';
 import * as schema from '@core/db/schema';
 import { eq } from 'drizzle-orm';
 
 export interface SyncEngineStatus {
   isSyncing: boolean;
   pendingCount: number;
+  pendingRecordIds: string[];
   lastSuccessAt: string | null;
   lastError: string | null;
   isOnline: boolean;
@@ -26,8 +27,11 @@ export class SyncEngine {
   private _lastError: string | null = null;
   private _lastSuccessAt: string | null = null;
   private _pendingCount: number = 0;
+  private _pendingRecordIds: string[] = [];
   private _listeners: Set<SyncEngineListener> = new Set();
   private _farmId: string;
+  private _outboxUnsubscribe: (() => void) | null = null;
+  private _txUnsubscribe: (() => void) | null = null;
 
   constructor(
     gateway: RemoteSyncGateway = defaultRemoteGateway,
@@ -37,6 +41,20 @@ export class SyncEngine {
     this._gateway = gateway;
     this._networkMonitor = monitor;
     this._farmId = farmId;
+    this.bindOutboxListeners();
+  }
+
+  private bindOutboxListeners(): void {
+    if (!this._outboxUnsubscribe) {
+      this._outboxUnsubscribe = OutboxRepository.addChangeListener(() => {
+        void this.refreshPendingCount();
+      });
+    }
+    if (!this._txUnsubscribe) {
+      this._txUnsubscribe = onTransactionCommitted(() => {
+        void this.refreshPendingCount();
+      });
+    }
   }
 
   get isSyncing(): boolean {
@@ -55,6 +73,10 @@ export class SyncEngine {
     return this._pendingCount;
   }
 
+  get pendingRecordIds(): string[] {
+    return this._pendingRecordIds;
+  }
+
   get gateway(): RemoteSyncGateway {
     return this._gateway;
   }
@@ -70,8 +92,8 @@ export class SyncEngine {
   setFarmId(farmId: string): void {
     if (this._farmId !== farmId) {
       this._farmId = farmId;
-      this.refreshPendingCount();
-      this.loadLastSuccessAt();
+      void this.refreshPendingCount();
+      void this.loadLastSuccessAt();
     }
   }
 
@@ -83,6 +105,7 @@ export class SyncEngine {
    * Inicializa o motor de sync, recuperando itens in-flight travados e lendo cursores.
    */
   async initialize(): Promise<void> {
+    this.bindOutboxListeners();
     try {
       await OutboxRepository.resetInFlight(this._farmId);
       await this.refreshPendingCount();
@@ -93,12 +116,19 @@ export class SyncEngine {
   }
 
   /**
-   * Atualiza a contagem de itens pendentes na outbox.
+   * Atualiza a contagem e os IDs de itens pendentes na outbox.
    */
   async refreshPendingCount(): Promise<number> {
     try {
       const count = await OutboxRepository.getPendingCount(this._farmId);
       this._pendingCount = count;
+      try {
+        if (typeof OutboxRepository.getPendingRecordIds === 'function') {
+          this._pendingRecordIds = await OutboxRepository.getPendingRecordIds(this._farmId);
+        }
+      } catch {
+        // Ignora caso getPendingRecordIds não esteja disponível em mock de teste
+      }
       this.notifyListeners();
       return count;
     } catch {
@@ -181,7 +211,9 @@ export class SyncEngine {
         pullLoops++;
       } while (lastPullHasMore && pullLoops < 5);
 
-      this._lastSuccessAt = new Date().toISOString();
+      if (pushFailed === 0) {
+        this._lastSuccessAt = new Date().toISOString();
+      }
       await this.refreshPendingCount();
 
       return {
@@ -215,6 +247,7 @@ export class SyncEngine {
     return {
       isSyncing: this._isSyncing,
       pendingCount: this._pendingCount,
+      pendingRecordIds: this._pendingRecordIds,
       lastSuccessAt: this._lastSuccessAt,
       lastError: this._lastError,
       isOnline: this._networkMonitor.isOnline(),
@@ -233,5 +266,6 @@ export class SyncEngine {
   }
 }
 
-const initialGateway = isSupabaseConfigured() ? supabaseRemoteGateway : defaultRemoteGateway;
-export const syncEngine = new SyncEngine(initialGateway);
+export const syncEngine = new SyncEngine(supabaseRemoteGateway);
+
+

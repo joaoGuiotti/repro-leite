@@ -57,6 +57,7 @@ export function CabecalhoStatusSimulador({ compact = false }: CabecalhoStatusSim
   const [isSavingFarm, setIsSavingFarm] = useState(false);
 
   // Status visual para a barra de sincronismo
+  const pendingTitle = `${pendingCount} pendente${pendingCount > 1 ? 's' : ''}`;
   const syncStatusConfig = {
     protected: {
       icon: <ShieldCheck size={14} color="#34d399" />,
@@ -72,19 +73,26 @@ export function CabecalhoStatusSimulador({ compact = false }: CabecalhoStatusSim
     },
     pending: {
       icon: <CloudOff size={14} color="#fbbf24" />,
-      title: `${pendingCount} pendente${pendingCount > 1 ? 's' : ''}`,
+      title: pendingTitle,
       subtitle: 'Modo Curral',
       textColor: 'text-amber-300 dark:text-amber-400',
     },
     offline: {
-      icon: <CloudOff size={14} color="#94a3b8" />,
-      title: 'Curral Offline',
-      subtitle: isSimulatedOffline ? 'Simulado' : 'Sem sinal de rede',
+      icon: <CloudOff size={14} color={pendingCount > 0 ? '#fbbf24' : '#94a3b8'} />,
+      title: pendingCount > 0 ? pendingTitle : 'Curral Offline',
+      subtitle:
+        pendingCount > 0
+          ? isSimulatedOffline
+            ? 'Curral Offline (Simulado)'
+            : 'Curral Offline'
+          : isSimulatedOffline
+            ? 'Simulado'
+            : 'Sem sinal de rede',
       textColor: 'text-amber-300 dark:text-amber-400',
     },
     error: {
       icon: <AlertCircle size={14} color="#f87171" />,
-      title: 'Sem Conexão',
+      title: pendingCount > 0 ? pendingTitle : 'Sem Conexão',
       subtitle: 'Falha no envio',
       textColor: 'text-red-300 dark:text-red-400',
     },

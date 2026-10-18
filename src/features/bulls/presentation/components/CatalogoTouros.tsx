@@ -6,8 +6,10 @@ import {
   EmptyState,
   Icon,
   ListLoadingState,
+  PendingSyncBadge,
   hapticFeedback,
 } from '@/ui';
+import { useSyncStatus } from '@core/sync';
 import { FlashList } from '@shopify/flash-list';
 import { Minus, Plus } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
@@ -35,6 +37,7 @@ export function CatalogoTouros({
   farmId,
   loading = false,
 }: CatalogoTourosProps) {
+  const { isRecordPending } = useSyncStatus();
   const [modalAberto, setModalAberto] = useState(false);
 
   const handleAdjustStraws = useCallback(
@@ -71,7 +74,10 @@ export function CatalogoTouros({
           <Cartao>
             <View className="flex-row items-start justify-between">
               <View className="flex-1 mr-3">
-                <Text className="text-lg font-black text-gray-950 dark:text-gray-100">{touro.name}</Text>
+                <View className="flex-row items-center gap-2">
+                  <Text className="text-lg font-black text-gray-950 dark:text-gray-100">{touro.name}</Text>
+                  {isRecordPending(touro.id) && <PendingSyncBadge compact />}
+                </View>
                 <Text className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
                   Raça: <Text className="font-semibold text-gray-900 dark:text-gray-200">{touro.breed}</Text>
                   {touro.code ? ` · Palheta: ${touro.code}` : ''}
@@ -128,7 +134,7 @@ export function CatalogoTouros({
         </View>
       );
     },
-    [handleAdjustStraws]
+    [handleAdjustStraws, isRecordPending]
   );
 
   return (

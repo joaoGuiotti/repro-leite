@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Alert, Text, View, Modal, TextInput, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
 import { i18n } from '@/i18n';
 import { Botao, Cartao, Icon, Screen, SeloStatus, hapticFeedback } from '@/ui';
-import { DEFAULT_FARM_ID } from '@core/db';
 import { useSyncStatus } from '@core/sync';
 import { useFarm } from '@core/farm';
 import { Cloud, Copy, FileSpreadsheet, RotateCcw, Share2, Sliders, LogOut, UserCheck, Home } from 'lucide-react-native';
@@ -19,12 +18,16 @@ export interface SettingsScreenProps {
   farmId?: string;
 }
 
-export function SettingsScreen({ farmId = DEFAULT_FARM_ID }: SettingsScreenProps) {
+export function SettingsScreen({ farmId: propFarmId }: SettingsScreenProps) {
+  const { farmId: contextFarmId, farmName, updateFarmName } = useFarm();
+  const farmId = propFarmId ?? contextFarmId;
+
   const {
     state,
     pendingCount,
     lastSyncedDescription,
     triggerSyncNow,
+    refreshPendingCount,
     isSimulatedOffline,
     clockDriftExceeded,
     lastError,
@@ -59,7 +62,6 @@ export function SettingsScreen({ farmId = DEFAULT_FARM_ID }: SettingsScreenProps
     initialSyncError,
     performInitialSync,
   } = useAccount();
-  const { farmName, updateFarmName } = useFarm();
   const [farmNameModalVisible, setFarmNameModalVisible] = useState(false);
   const [tempFarmNameInput, setTempFarmNameInput] = useState(farmName);
   const [isSavingFarmName, setIsSavingFarmName] = useState(false);
@@ -169,6 +171,7 @@ export function SettingsScreen({ farmId = DEFAULT_FARM_ID }: SettingsScreenProps
 
       if (res.ok) {
         await refresh();
+        await refreshPendingCount();
         setRestoreModalVisible(false);
         setRestorePayload(null);
         setRestoreRawContent(null);

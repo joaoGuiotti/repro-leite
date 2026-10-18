@@ -8,8 +8,10 @@ import {
   hapticFeedback,
   Icon,
   ListLoadingState,
+  PendingSyncBadge,
   SeloStatus,
 } from '@/ui';
+import { useSyncStatus } from '@core/sync';
 import { FlashList } from '@shopify/flash-list';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -47,6 +49,7 @@ export function HerdScreen({
   onInseminateAnimal,
   onCountChange,
 }: HerdScreenProps) {
+  const { isRecordPending } = useSyncStatus();
   // Filtros locais
   const [busca, setBusca] = useState('');
   const [filtroRepro, setFiltroRepro] = useState<
@@ -279,6 +282,7 @@ export function HerdScreen({
             </View>
 
             <View className="items-end gap-1">
+              {isRecordPending(animal.id) && <PendingSyncBadge compact />}
               {Boolean(animal.earTagConflict) && (
                 <SeloStatus
                   status="alerta"
@@ -347,7 +351,7 @@ export function HerdScreen({
         </View>
       );
     },
-    [handleReativarAnimal, onInseminateAnimal]
+    [handleReativarAnimal, isRecordPending, onInseminateAnimal]
   );
 
   return (

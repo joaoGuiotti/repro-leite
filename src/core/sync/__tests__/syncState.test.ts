@@ -17,6 +17,9 @@ describe('Domain: syncState (Consolidação de Status de Proteção)', () => {
     expect(getSyncStateDescription('protected')).toBe('Nuvem Protegida · Sincronizado agora');
     expect(getSyncStateDescription('pending', 1)).toBe('1 alteração pendente (Modo Curral)');
     expect(getSyncStateDescription('pending', 4)).toBe('4 alterações pendentes (Modo Curral)');
+    expect(getSyncStateDescription('offline', 2)).toBe('2 alterações pendentes (Modo Curral Offline)');
+    expect(getSyncStateDescription('error', 3)).toBe('Falha na sincronização · 3 pendentes');
     expect(getSyncStateDescription('syncing')).toBe('Sincronizando com Supabase...');
   });
 });
+

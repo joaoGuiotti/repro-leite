@@ -1,5 +1,5 @@
 import { AppIcons, hapticFeedback, Icon, Screen } from '@/ui';
-import { DEFAULT_FARM_ID } from '@core/db';
+import { useFarm } from '@core/farm';
 import { BullsScreen } from '@features/bulls';
 import { AnimalRecord, HerdScreen, getHerdUseCases } from '@features/herd';
 import { InseminationScreen } from '@features/insemination';
@@ -16,10 +16,12 @@ export interface ReproductionScreenProps {
  * Tela principal de Reprodução & Curral, orquestrando as abas de Rebanho, Inseminar e Touros.
  */
 export function ReproductionScreen({
-  farmId = DEFAULT_FARM_ID,
+  farmId: propFarmId,
   initialTab = 'rebanho',
   preselectedAnimalId,
 }: ReproductionScreenProps) {
+  const { farmId: contextFarmId } = useFarm();
+  const farmId = propFarmId ?? contextFarmId;
   const [secaoAtiva, setSecaoAtiva] = useState<'rebanho' | 'inseminar' | 'touros'>(initialTab);
   const [totalRebanho, setTotalRebanho] = useState<number>(0);
   const [totalTouros, setTotalTouros] = useState<number>(0);

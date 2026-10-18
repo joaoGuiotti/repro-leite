@@ -1,5 +1,7 @@
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
+import { PendingSyncBadge } from '@/ui';
+import { useSyncStatus } from '@core/sync';
 import { BadgeBrinco } from '@features/herd';
 import { CalfListItem } from '../../domain/calves.types';
 
@@ -10,6 +12,7 @@ export interface CalfListCardProps {
 }
 
 export function CalfListCard({ item, isSelected = false, onPress }: CalfListCardProps) {
+  const { isRecordPending } = useSyncStatus();
   const isFemale = item.sex === 'femea';
   const displayParents = [
     item.sireName ? `P: ${item.sireName}` : null,
@@ -40,12 +43,15 @@ export function CalfListCard({ item, isSelected = false, onPress }: CalfListCard
         {/* Informações Principais */}
         <View className="flex-1 justify-center">
           <View className="flex-row items-center justify-between gap-1 mb-0.5">
-            <Text
-              className="text-sm font-black text-gray-950 dark:text-gray-100 flex-1"
-              numberOfLines={1}
-            >
-              {item.name || `Bezerra #${item.earTag}`}
-            </Text>
+            <View className="flex-row items-center gap-1.5 flex-1">
+              <Text
+                className="text-sm font-black text-gray-950 dark:text-gray-100 shrink"
+                numberOfLines={1}
+              >
+                {item.name || `Bezerra #${item.earTag}`}
+              </Text>
+              {isRecordPending(item.id) && <PendingSyncBadge compact />}
+            </View>
 
             {/* Badge de Volume Diário ou Peso */}
             {item.dailyLiters > 0 ? (

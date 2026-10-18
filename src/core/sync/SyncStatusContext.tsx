@@ -1,8 +1,9 @@
 import { useNetInfo } from '@react-native-community/netinfo';
-import React, { ReactNode, createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { ReactNode, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { networkMonitor } from '../network/network-monitor';
 import { getSupabaseClient, isSupabaseConfigured } from '../network/supabase-client';
 import { supabaseRemoteGateway } from '../network/supabase-remote-gateway';
+import { OutboxRepository } from './outbox.repository';
 import { syncScheduler } from './scheduler';
 import { SyncEngineStatus, syncEngine } from './sync-engine';
 import { SyncProtectionState, getSyncStateDescription, resolveProtectionStatus } from './sync-state';
@@ -10,6 +11,8 @@ import { SyncProtectionState, getSyncStateDescription, resolveProtectionStatus }
 export interface SyncStatusContextType {
   state: SyncProtectionState;
   pendingCount: number;
+  pendingRecordIds: string[];
+  isRecordPending: (recordId: string) => boolean;
   lastSyncedDescription: string;
   isSimulatedOffline: boolean;
   isOnline: boolean;
@@ -52,7 +55,7 @@ export function SyncStatusProvider({ children }: { children: ReactNode }) {
 
   // Sincroniza em tempo real as alterações detectadas pelo hook nativo useNetInfo com o NetworkMonitor global
   useEffect(() => {
-    if (netInfo) {
+    if (netInfo && netInfo.isConnected !== null) {
       networkMonitor.updateNetworkState({
         isConnected: netInfo.isConnected,
         isInternetReachable: netInfo.isInternetReachable,
@@ -62,33 +65,51 @@ export function SyncStatusProvider({ children }: { children: ReactNode }) {
   }, [netInfo]);
 
   useEffect(() => {
-    // Inicializa o engine e o agendador de sincronização
-    syncEngine.initialize();
-    syncScheduler.start();
+    // Inicializa o engine para carregar a contagem de pendências da outbox local
+    void syncEngine.initialize();
 
     // Ouve atualizações do engine
     const unsubscribeEngine = syncEngine.addListener((status) => {
-      setEngineStatus(status);
+      setEngineStatus({ ...status });
     });
 
     // Ouve atualizações manuais no monitor de rede
     const unsubscribeNetwork = networkMonitor.addListener(() => {
       setIsSimulatedOffline(networkMonitor.isSimulatedOffline());
-      setEngineStatus(syncEngine.getStatus());
+      setEngineStatus({ ...syncEngine.getStatus() });
     });
 
     return () => {
       unsubscribeEngine();
       unsubscribeNetwork();
-      syncScheduler.stop();
     };
   }, []);
+
+  // Ativa o agendador automático e o debounce pós-escrita apenas quando autenticado na nuvem
+  useEffect(() => {
+    if (!userEmail) {
+      syncScheduler.stop();
+      return;
+    }
+
+    syncScheduler.start();
+    const unsubscribeOutbox = OutboxRepository.addChangeListener(({ isEnqueue }) => {
+      if (isEnqueue && networkMonitor.isOnline()) {
+        syncScheduler.triggerPostWriteSync();
+      }
+    });
+
+    return () => {
+      unsubscribeOutbox();
+      syncScheduler.stop();
+    };
+  }, [userEmail]);
 
   const toggleSimulatedOffline = useCallback(() => {
     const nextState = !networkMonitor.isSimulatedOffline();
     networkMonitor.simulateOffline(nextState);
     setIsSimulatedOffline(nextState);
-    setEngineStatus(syncEngine.getStatus());
+    setEngineStatus({ ...syncEngine.getStatus() });
   }, []);
 
   const triggerSyncNow = useCallback(async () => {
@@ -108,10 +129,21 @@ export function SyncStatusProvider({ children }: { children: ReactNode }) {
     await syncEngine.refreshPendingCount();
   }, []);
 
-  // Conectividade física em tempo real
-  const isPhysicalOnline = Boolean(
-    netInfo.isConnected && netInfo.isInternetReachable !== false
+  const pendingSet = useMemo(
+    () => new Set(engineStatus.pendingRecordIds ?? []),
+    [engineStatus.pendingRecordIds]
   );
+
+  const isRecordPending = useCallback(
+    (recordId: string) => pendingSet.has(recordId),
+    [pendingSet]
+  );
+
+  // Conectividade física em tempo real (assume true durante estado transitório inicial se isConnected for null)
+  const isPhysicalOnline =
+    netInfo.isConnected === null
+      ? networkMonitor.isConnected() !== false
+      : Boolean(netInfo.isConnected && netInfo.isInternetReachable !== false);
   const isEffectiveOnline = isPhysicalOnline && !isSimulatedOffline;
 
   const hasError = Boolean(engineStatus.lastError);
@@ -125,6 +157,8 @@ export function SyncStatusProvider({ children }: { children: ReactNode }) {
   const value: SyncStatusContextType = {
     state,
     pendingCount: engineStatus.pendingCount,
+    pendingRecordIds: engineStatus.pendingRecordIds ?? [],
+    isRecordPending,
     lastSyncedDescription: getSyncStateDescription(
       state,
       engineStatus.pendingCount,
@@ -155,7 +189,36 @@ export function SyncStatusProvider({ children }: { children: ReactNode }) {
 export function useSyncStatus(): SyncStatusContextType {
   const context = useContext(SyncStatusContext);
   if (!context) {
-    throw new Error('useSyncStatus must be used within a SyncStatusProvider');
+    const status = syncEngine.getStatus();
+    const pendingSet = new Set(status.pendingRecordIds ?? []);
+    const state = resolveProtectionStatus(
+      status.pendingCount,
+      status.isSyncing,
+      Boolean(status.lastError),
+      status.isOnline
+    );
+    return {
+      state,
+      pendingCount: status.pendingCount,
+      pendingRecordIds: status.pendingRecordIds ?? [],
+      isRecordPending: (recordId: string) => pendingSet.has(recordId),
+      lastSyncedDescription: getSyncStateDescription(state, status.pendingCount),
+      isSimulatedOffline: networkMonitor.isSimulatedOffline(),
+      isOnline: status.isOnline,
+      isEffectiveOnline: status.isOnline,
+      networkType: 'unknown',
+      isInternetReachable: status.isOnline,
+      clockDriftExceeded: false,
+      lastError: status.lastError,
+      userEmail: null,
+      toggleSimulatedOffline: () => {},
+      triggerSyncNow: async () => {},
+      refreshPendingCount: async () => {
+        await syncEngine.refreshPendingCount();
+      },
+    };
   }
   return context;
 }
+
+
