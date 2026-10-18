@@ -25,6 +25,16 @@ export function FarmProvider({ children }: { children: ReactNode }) {
       ) as { id: string; name: string } | null;
 
       if (row && row.name) {
+        if (row.id && row.id !== DEFAULT_FARM_ID) {
+          try {
+            rawDb.runSync(
+              'UPDATE sync_queue SET farm_id = ? WHERE farm_id = ?;',
+              [row.id, DEFAULT_FARM_ID]
+            );
+          } catch {
+            // Ignora em ambientes mockados
+          }
+        }
         setFarmId(row.id);
         setFarmName(row.name);
         if (row.id && syncEngine.farmId !== row.id) {
@@ -46,6 +56,16 @@ export function FarmProvider({ children }: { children: ReactNode }) {
         ) as { id: string; name: string } | null;
 
         if (isMounted && row && row.name) {
+          if (row.id && row.id !== DEFAULT_FARM_ID) {
+            try {
+              rawDb.runSync(
+                'UPDATE sync_queue SET farm_id = ? WHERE farm_id = ?;',
+                [row.id, DEFAULT_FARM_ID]
+              );
+            } catch {
+              // Ignora em ambientes mockados
+            }
+          }
           setFarmId(row.id);
           setFarmName(row.name);
           if (row.id && syncEngine.farmId !== row.id) {

@@ -3,9 +3,11 @@ import {
   ModalPadrao,
   EmptyState,
   ListLoadingState,
+  PendingSyncBadge,
   AppIcons,
   hapticFeedback,
 } from '@/ui';
+import { useSyncStatus } from '@core/sync';
 import { BadgeBrinco } from '@features/herd';
 import { History, Trash2 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -75,6 +77,7 @@ export function HistoricoInseminacoesRecentes({
   refreshTrigger,
   onAtualizar,
 }: HistoricoInseminacoesRecentesProps) {
+  const { isRecordPending } = useSyncStatus();
   const [lista, setLista] = useState<InseminationWithAnimalSummary[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [iaParaExcluir, setIaParaExcluir] =
@@ -214,6 +217,7 @@ export function HistoricoInseminacoesRecentes({
                     {fase.texto}
                   </Text>
                 </View>
+                {isRecordPending(ia.id) && <PendingSyncBadge compact />}
               </View>
 
               {/* Linha 2: Touro e Data da IA */}

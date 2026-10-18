@@ -3,7 +3,7 @@ import { RefreshControl, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { i18n } from '@/i18n';
 import { Cartao, ErrorState, ListLoadingState, Screen, SeloStatus } from '@/ui';
-import { DEFAULT_FARM_ID } from '@core/db';
+import { useFarm } from '@core/farm';
 import { formatToDisplay, useManagementDate } from '@core/simulation';
 import { AlertWithReproDetails } from '../../domain/today.types';
 import { getTodayUseCases } from '../../factory';
@@ -20,7 +20,9 @@ export interface TodayScreenProps {
   farmId?: string;
 }
 
-export function TodayScreen({ farmId = DEFAULT_FARM_ID }: TodayScreenProps) {
+export function TodayScreen({ farmId: propFarmId }: TodayScreenProps) {
+  const { farmId: contextFarmId } = useFarm();
+  const farmId = propFarmId ?? contextFarmId;
   const router = useRouter();
   const { activeDateString, isSimulated } = useManagementDate();
   const [selectedRepeatAlert, setSelectedRepeatAlert] =

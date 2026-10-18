@@ -1,5 +1,7 @@
+import { DEFAULT_FARM_ID } from '@core/db/client';
 import { DrizzleTransactionRunner } from '@core/db/transaction';
 import { OutboxRepository } from '@core/sync/outbox.repository';
+import { syncEngine } from '@core/sync/sync-engine';
 import { AnimalSqliteRepository } from '@features/herd';
 import { BullSqliteRepository } from '@features/bulls';
 import { getAlertsUseCases } from '@features/alerts';
@@ -33,7 +35,10 @@ export function getInseminationUseCases(): InseminationUseCases {
         if (!res.ok) throw new Error(res.error.message);
       },
       softDeleteBySourceId: async (sourceId: string) => {
-        const res = await alerts.dismissUseCase.execute('00000000-0000-4000-a000-000000000001', sourceId);
+        const res = await alerts.dismissUseCase.execute(
+          syncEngine.farmId || DEFAULT_FARM_ID,
+          sourceId
+        );
         if (!res.ok) throw new Error(res.error.message);
       },
     };

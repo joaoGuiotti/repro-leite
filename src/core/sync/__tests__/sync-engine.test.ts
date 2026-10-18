@@ -103,4 +103,45 @@ describe('Sync: SyncEngine (End-to-End Orchestrator)', () => {
 
     unsubscribe();
   });
+
+  test('reatividade local: qualquer mutação na Outbox (INSERT, UPDATE, DELETE) atualiza imediatamente pendingCount e pendingRecordIds', async () => {
+    jest.spyOn(OutboxRepository, 'getPendingCount').mockResolvedValue(3);
+    jest.spyOn(OutboxRepository, 'getPendingRecordIds').mockResolvedValue(['rec-1', 'rec-2', 'rec-3']);
+
+    const observedCounts: number[] = [];
+    const unsubscribe = engine.addListener((status) => {
+      observedCounts.push(status.pendingCount);
+    });
+
+    // Dispara notificação de escrita na outbox (como ocorre em OutboxRepository.enqueue)
+    OutboxRepository.notifyChange({ isEnqueue: true });
+
+    // Aguarda resolução da microtask de refreshPendingCount
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+    expect(engine.pendingCount).toBe(3);
+    expect(engine.pendingRecordIds).toEqual(['rec-1', 'rec-2', 'rec-3']);
+    expect(observedCounts).toContain(3);
+
+    unsubscribe();
+  });
+
+  test('regressão: chamada desvinculada de OutboxRepository.enqueue (padrão das factories) não falha por perda de this', async () => {
+    jest.spyOn(OutboxRepository, 'getPendingCount').mockResolvedValue(1);
+    jest.spyOn(OutboxRepository, 'getPendingRecordIds').mockResolvedValue(['ins-1']);
+
+    const outbox = {
+      enqueue: OutboxRepository.enqueue,
+    };
+
+    await expect(
+      outbox.enqueue(farmId, 'inseminations', 'ins-1', 'INSERT', { id: 'ins-1' })
+    ).resolves.toBeUndefined();
+
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+    expect(engine.pendingCount).toBe(1);
+    expect(engine.pendingRecordIds).toEqual(['ins-1']);
+  });
 });
+

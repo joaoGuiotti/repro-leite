@@ -1,6 +1,6 @@
 import { initDatabase } from '@core/db';
 import { CabecalhoStatusSimulador, ManagementDateProvider } from '@core/simulation';
-import { SyncStatusProvider } from '@core/sync';
+import { SyncStatusProvider, syncEngine } from '@core/sync';
 import { FarmProvider } from '@core/farm';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -23,6 +23,7 @@ export default function RootLayout() {
     async function setup() {
       try {
         await initDatabase();
+        await syncEngine.initialize();
       } catch (err: any) {
         console.error('Falha ao inicializar banco SQLite local:', err);
       } finally {

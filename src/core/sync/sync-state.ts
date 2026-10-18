@@ -48,6 +48,9 @@ export function getSyncStateDescription(
         ? `${pendingCount} ${pendingCount === 1 ? 'alteração pendente' : 'alterações pendentes'} (Modo Curral Offline)`
         : 'Modo Curral Offline';
     case 'error':
-      return 'Falha na sincronização';
+      return pendingCount > 0
+        ? `Falha na sincronização · ${pendingCount} ${pendingCount === 1 ? 'pendente' : 'pendentes'}`
+        : 'Falha na sincronização';
   }
 }
+
